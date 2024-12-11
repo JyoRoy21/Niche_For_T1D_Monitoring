@@ -51,11 +51,13 @@ getwd()
 #Metadata Importing
 meta_batch1 <- read.table("/Users/jyotirmoyroy/Desktop/Immunometabolism T1D Paper/Data/Sequencing/Pathway Analysis/metadata_Jessexperimental_PathwayAnalysis.csv", sep=",", header=T) # Metadata file
 meta_batch2 <- read.table("/Users/jyotirmoyroy/Desktop/Immunometabolism T1D Paper/Data/Sequencing/Pathway Analysis/metadata_Jessvalidation_PathwayAnalysis.csv", sep=",", header=T) # Metadata file
+meta_batch3 <- read.table("/Users/jyotirmoyroy/Desktop/Immunometabolism T1D Paper/Data/Sequencing/Pathway Analysis/metadata_MetabolomicsCohort_PathwayAnalysis.csv", sep=",", header=T) # Metadata file
 meta_batch1 <- as.data.frame(meta_batch1)
 meta_batch2 <- as.data.frame(meta_batch2)
+meta_batch3 <- as.data.frame(meta_batch3)
 
 # Merge metadata by columns (i.e., add samples from Batch 2 to Batch 1)
-meta_combined <- rbind(meta_batch1, meta_batch2)
+meta_combined <- rbind(meta_batch1, meta_batch2,meta_batch3)
 
 # Preview the combined metadata
 head(meta_combined)
@@ -68,6 +70,10 @@ counts_batch1 <- na.omit(counts_batch1)
 counts_batch2 <- as.data.frame(read.table("/Users/jyotirmoyroy/Desktop/Immunometabolism T1D Paper/Data/Sequencing/Pathway Analysis/gene_expected_count.annot_Jessvalidation_PathwayAnalysis.csv", sep=",", header=T,check.names = FALSE)) # Raw counts file
 counts_batch2 <- na.omit(counts_batch2)
 
+counts_batch3 <- as.data.frame(read.table("/Users/jyotirmoyroy/Desktop/Immunometabolism T1D Paper/Data/Sequencing/Pathway Analysis/gene_expected_count.annot_MetabolomicsCohort_Week6.csv", sep=",", header=T,check.names = FALSE)) # Raw counts file
+counts_batch3 <- na.omit(counts_batch3)
+
+
 #Remove duplicate names
 counts_batch1 <- counts_batch1[!duplicated(counts_batch1[, 1]), ]
 genes <- counts_batch1[, 1]
@@ -79,10 +85,16 @@ genes <- counts_batch2[, 1]
 rownames(counts_batch2) <- genes
 counts_batch2 <- counts_batch2[, -1]
 
-#Combine data
+counts_batch3 <- counts_batch3[!duplicated(counts_batch3[, 1]), ]
+genes <- counts_batch3[, 1]
+rownames(counts_batch3) <- genes
+counts_batch3 <- counts_batch3[, -1]
 
-# Merge counts by row (gene), matching common genes between both batches
-combined_counts <- merge(counts_batch1, counts_batch2, by="row.names", all=TRUE)
+#Combine data
+# Merge counts_batch1 and counts_batch2
+combined_counts <- merge(counts_batch1, counts_batch2, by = "row.names", all = TRUE)
+# Merge the result with counts_batch3
+combined_counts <- merge(combined_counts, counts_batch3, by.x = "Row.names", by.y = "row.names", all = TRUE)
 
 # Set rownames back to genes
 rownames(combined_counts) <- combined_counts$Row.names
@@ -97,37 +109,37 @@ head(combined_counts)
 #                               paste0("Healthy_", meta_combined$Day), 
 #                               meta_combined$Group)
 
-meta_combined$Group <- ifelse(meta_combined$Group == "Progressor", 
-                               paste0("Progressor_", meta_combined$Time), 
-                               paste0("Non-Progressor_", meta_combined$Time))
+# meta_combined$Group <- ifelse(meta_combined$Group == "Progressor", 
+#                                paste0("Progressor_", meta_combined$Time), 
+#                                paste0("Non-Progressor_", meta_combined$Time))
 # Filter out "Rejected" samples from meta_combined
 #meta_combined <- meta_combined[meta_combined$Group != "Rejected", ]
 
 # Select columns in combined_counts that match the remaining sample names in meta_combined
-combined_counts <- combined_counts[, meta_combined$Samples]  # Ensure Sample_IDs match column names in combined_counts
-
-case1_f1 <- flexiDEG.function1(combined_counts, meta_combined, # Run Function 1
-                         convert_genes = F, exclude_riken = T, exclude_pseudo = F,
-                         batches = T, quality = T, variance = F,use_pseudobulk = F) # Select filters: 2, 0, 15
-
+#combined_counts <- combined_counts[, meta_combined$Samples]  # Ensure Sample_IDs match column names in combined_counts
+# 
+# case1_f1 <- flexiDEG.function1(combined_counts, meta_combined, # Run Function 1
+#                          convert_genes = F, exclude_riken = T, exclude_pseudo = F,
+#                          batches = T, quality = T, variance = F,use_pseudobulk = F) # Select filters: 2, 0, 15
+# 
 
 
 ```
 ## GSVA Analysis
-```{r DESEQ}
+```{r GSVA}
 
 
-# Color palettes
-coul <- colorRampPalette(brewer.pal(11, "RdBu"))(100) # Palette for gene heatmaps
-coul_gsva <- colorRampPalette(brewer.pal(11, "PRGn"))(100) # Palette for gsva heatmaps
-colSide <- flexiDEG.colors(meta_combined)
-unique_colSide <- unique(colSide)
-
-# A) Biology Agnostic ---- 
-getwd() 
-currentDate <- Sys.Date()
-#save_name <- paste(currentDate, sample_set)
-case1_f2 <- flexiDEG.function2(case1_f1, meta_combined) # Run Function 2
+# # Color palettes
+# coul <- colorRampPalette(brewer.pal(11, "RdBu"))(100) # Palette for gene heatmaps
+# coul_gsva <- colorRampPalette(brewer.pal(11, "PRGn"))(100) # Palette for gsva heatmaps
+# colSide <- flexiDEG.colors(meta_combined)
+# unique_colSide <- unique(colSide)
+# 
+# # A) Biology Agnostic ---- 
+# getwd() 
+# currentDate <- Sys.Date()
+# #save_name <- paste(currentDate, sample_set)
+# case1_f2 <- flexiDEG.function2(case1_f1, meta_combined) # Run Function 2
 #case1_f3 <- flexiDEG.function3(case1_f2, meta_combined, fdr_cutoff = 1, logfc_cutoff = 2.5) # Run Function 3       ++++ Doesn't seem to be working correctly
 # Gene Clustering
 # Double Volcano
@@ -137,74 +149,48 @@ case1_f2 <- flexiDEG.function2(case1_f1, meta_combined) # Run Function 2
 # Remove those rows from case1_f1
 #case1_f1 <- case1_f1[-rows_to_remove, ]
 
-# B) Pre-hoc Biology ---- 
-getwd() 
-sample_set <- "GSVA_BulkRNA" 
-currentDate <- Sys.Date()
-save_name <- paste(currentDate, sample_set)
-
-sets_celltype <- msigdbr(species="Mus musculus", category="C8") # Large df w/ categories
-wl_celltype <- split(sets_celltype$gene_symbol, # Genes to split into pathways, by ensembl
-                      sets_celltype$gs_name) # Pathway names
-#pwl_msigdbr <- c(pwl_hallmark, pwl_kegg) # Compile them all
-pwl_msigdbr <- sets_celltype
-
-case1_f1<-as.matrix(case1_f1)# Change dataframe to matrix
-is.matrix(case1_f1) # GSVA needs data as matrix w/ genes as rownames; Must be TRUE to proceed
-gsvapar<-gsvaParam(case1_f1, c(wl_celltype), maxDiff=TRUE,minSize=3)
-gsva_case1 <- gsva(gsvapar)
-
-gsva_case1<-as.data.frame(gsva_case1) # Convert to dataframe
-gsvaf2 <- flexiDEG.function2(gsva_case1, meta_combined) # Run Function 2
-dev.off()  # Close any open graphics devices
-
-library(dplyr)
-
-
-# meta_combined <- meta_combined %>%
-#   mutate(Group = case_when(
-#     Group %in% c("Healthy_7", "Healthy_14") ~ "Early",
-#     Group == "Healthy_28" ~ "Intermediate",
-#     Group %in% c("Healthy_42", "Healthy_56") ~ "Late",
-#     TRUE ~ Group  # Keep other values unchanged
-#   ))
-# Color palettes
-coul <- colorRampPalette(brewer.pal(11, "RdBu"))(100) # Palette for gene heatmaps
-coul_gsva <- colorRampPalette(brewer.pal(11, "PRGn"))(100) # Palette for gsva heatmaps
-colSide <- flexiDEG.colors(meta_combined)
-unique_colSide <- unique(colSide)
-#dev.off()
-heatmap.2(as.matrix(gsva_case1), scale="row", col=coul_gsva, key= T, xlab="", ylab="", 
-          margins=c(7,15), ColSideColors=colSide, trace="none", key.title=NA, 
-          key.ylab=NA, keysize=0.8, dendrogram="both",
-          cexRow = 1.5,  # Increase font size for row labels
-          cexCol = 1.5)   # Increase font size for column labels)
-
-gsvaf3 <- flexiDEG.function3(gsva, meta_combined) # Run Function 3
-genes_cons <- flexiDEG.sharedgenes(pwl_msigdbr, gsvaf3, cutoff = 1) # Conserved genes
-# Pathway clustering
-# Double volcano
-# Differential networks (DNApath)
-gsvaf4 <- flexiDEG.function4(gsvaf2, meta_combined,validation_option = 1) # Run Function 4
-ENplots <- flexiDEG.ENplots(gsva_case1, gsvaf4, colSide, unique_colSide) # Generate PCA plots
-ggarrange(plotlist = ENplots, ncol=5, nrow=4) # Plots in 5 cols & 4 rows
-# Collect EN results
-EN1 <- na.omit(gsva_case1[unique(rownames(gsva_case1)[as_vector(gsvaf4[[1]])]), ])
-EN.95 <- na.omit(gsva_case1[unique(rownames(gsva_case1)[as_vector(gsvaf4[[2]])]), ])
-EN.9 <- na.omit(gsva_case1[unique(rownames(gsva_case1)[as_vector(gsvaf4[[3]])]), ])
-EN.85 <- na.omit(gsva_case1[unique(rownames(gsva_case1)[as_vector(gsvaf4[[4]])]), ])
-EN.8 <- na.omit(gsva_case1[unique(rownames(gsva_case1)[as_vector(gsvaf4[[5]])]), ])
-
-heatmap.2(as.matrix(EN1), scale="row", col=coul_gsva, key= T, xlab="", ylab="", 
-          margins=c(7,7), ColSideColors=colSide, trace="none", key.title=NA, 
-          key.ylab=NA, keysize=0.8, dendrogram="both")
-ggbiplot(prcomp(t(EN1), scale.=T), ellipse=T, groups=names(colSide), var.axes=F, 
-         var.scale=1, circle=T) + 
-  theme_classic() + scale_color_manual(name="Group", values=colSide)
-
-
-
-
+# # B) Pre-hoc Biology ---- 
+# getwd() 
+# sample_set <- "GSVA_BulkRNA" 
+# currentDate <- Sys.Date()
+# save_name <- paste(currentDate, sample_set)
+# 
+# sets_celltype <- msigdbr(species="Mus musculus", category="C8") # Large df w/ categories
+# wl_celltype <- split(sets_celltype$gene_symbol, # Genes to split into pathways, by ensembl
+#                       sets_celltype$gs_name) # Pathway names
+# #pwl_msigdbr <- c(pwl_hallmark, pwl_kegg) # Compile them all
+# pwl_msigdbr <- sets_celltype
+# 
+# case1_f1<-as.matrix(case1_f1)# Change dataframe to matrix
+# is.matrix(case1_f1) # GSVA needs data as matrix w/ genes as rownames; Must be TRUE to proceed
+# gsvapar<-gsvaParam(case1_f1, c(wl_celltype), maxDiff=TRUE,minSize=3)
+# gsva_case1 <- gsva(gsvapar)
+# 
+# gsva_case1<-as.data.frame(gsva_case1) # Convert to dataframe
+# gsvaf2 <- flexiDEG.function2(gsva_case1, meta_combined) # Run Function 2
+# dev.off()  # Close any open graphics devices
+# 
+# library(dplyr)
+# 
+# 
+# # meta_combined <- meta_combined %>%
+# #   mutate(Group = case_when(
+# #     Group %in% c("Healthy_7", "Healthy_14") ~ "Early",
+# #     Group == "Healthy_28" ~ "Intermediate",
+# #     Group %in% c("Healthy_42", "Healthy_56") ~ "Late",
+# #     TRUE ~ Group  # Keep other values unchanged
+# #   ))
+# # Color palettes
+# coul <- colorRampPalette(brewer.pal(11, "RdBu"))(100) # Palette for gene heatmaps
+# coul_gsva <- colorRampPalette(brewer.pal(11, "PRGn"))(100) # Palette for gsva heatmaps
+# colSide <- flexiDEG.colors(meta_combined)
+# unique_colSide <- unique(colSide)
+# #dev.off()
+# heatmap.2(as.matrix(gsva_case1), scale="row", col=coul_gsva, key= T, xlab="", ylab="", 
+#           margins=c(7,15), ColSideColors=colSide, trace="none", key.title=NA, 
+#           key.ylab=NA, keysize=0.8, dendrogram="both",
+#           cexRow = 1.5,  # Increase font size for row labels
+#           cexCol = 1.5)   # Increase font size for column labels)
 
 
 
@@ -216,48 +202,48 @@ ggbiplot(prcomp(t(EN1), scale.=T), ellipse=T, groups=names(colSide), var.axes=F,
 ### Early Stage Analysis
 ```{r GSEAEarly, echo=FALSE}
 
-#Metadata Importing
-meta_batch1 <- read.table("/Users/jyotirmoyroy/Desktop/Immunometabolism T1D Paper/Data/Sequencing/Pathway Analysis/metadata_Jessexperimental_PathwayAnalysis.csv", sep=",", header=T) # Metadata file
-meta_batch2 <- read.table("/Users/jyotirmoyroy/Desktop/Immunometabolism T1D Paper/Data/Sequencing/Pathway Analysis/metadata_Jessvalidation_PathwayAnalysis.csv", sep=",", header=T) # Metadata file
-meta_batch1 <- as.data.frame(meta_batch1)
-meta_batch2 <- as.data.frame(meta_batch2)
-
-# Merge metadata by columns (i.e., add samples from Batch 2 to Batch 1)
-meta_combined <- rbind(meta_batch1, meta_batch2)
-
-# Preview the combined metadata
-head(meta_combined)
-
-
-#Counts Data Importing
-counts_batch1 <- as.data.frame(read.table("/Users/jyotirmoyroy/Desktop/Immunometabolism T1D Paper/Data/Sequencing/Pathway Analysis/gene_expected_count.annot_Jessexperimental_PathwayAnalysis.csv", sep=",", header=T,check.names = FALSE)) # Raw counts file
-counts_batch1 <- na.omit(counts_batch1)
-
-counts_batch2 <- as.data.frame(read.table("/Users/jyotirmoyroy/Desktop/Immunometabolism T1D Paper/Data/Sequencing/Pathway Analysis/gene_expected_count.annot_Jessvalidation_PathwayAnalysis.csv", sep=",", header=T,check.names = FALSE)) # Raw counts file
-counts_batch2 <- na.omit(counts_batch2)
-
-#Remove duplicate names
-counts_batch1 <- counts_batch1[!duplicated(counts_batch1[, 1]), ]
-genes <- counts_batch1[, 1]
-rownames(counts_batch1) <- genes
-counts_batch1 <- counts_batch1[, -1]
-
-counts_batch2 <- counts_batch2[!duplicated(counts_batch2[, 1]), ]
-genes <- counts_batch2[, 1]
-rownames(counts_batch2) <- genes
-counts_batch2 <- counts_batch2[, -1]
-
-#Combine data
-
-# Merge counts by row (gene), matching common genes between both batches
-combined_counts <- merge(counts_batch1, counts_batch2, by="row.names", all=TRUE)
-
-# Set rownames back to genes
-rownames(combined_counts) <- combined_counts$Row.names
-combined_counts <- combined_counts[, -1]
-
-# Preview the combined dataset
-head(combined_counts)
+# #Metadata Importing
+# meta_batch1 <- read.table("/Users/jyotirmoyroy/Desktop/Immunometabolism T1D Paper/Data/Sequencing/Pathway Analysis/metadata_Jessexperimental_PathwayAnalysis.csv", sep=",", header=T) # Metadata file
+# meta_batch2 <- read.table("/Users/jyotirmoyroy/Desktop/Immunometabolism T1D Paper/Data/Sequencing/Pathway Analysis/metadata_Jessvalidation_PathwayAnalysis.csv", sep=",", header=T) # Metadata file
+# meta_batch1 <- as.data.frame(meta_batch1)
+# meta_batch2 <- as.data.frame(meta_batch2)
+# 
+# # Merge metadata by columns (i.e., add samples from Batch 2 to Batch 1)
+# meta_combined <- rbind(meta_batch1, meta_batch2)
+# 
+# # Preview the combined metadata
+# head(meta_combined)
+# 
+# 
+# #Counts Data Importing
+# counts_batch1 <- as.data.frame(read.table("/Users/jyotirmoyroy/Desktop/Immunometabolism T1D Paper/Data/Sequencing/Pathway Analysis/gene_expected_count.annot_Jessexperimental_PathwayAnalysis.csv", sep=",", header=T,check.names = FALSE)) # Raw counts file
+# counts_batch1 <- na.omit(counts_batch1)
+# 
+# counts_batch2 <- as.data.frame(read.table("/Users/jyotirmoyroy/Desktop/Immunometabolism T1D Paper/Data/Sequencing/Pathway Analysis/gene_expected_count.annot_Jessvalidation_PathwayAnalysis.csv", sep=",", header=T,check.names = FALSE)) # Raw counts file
+# counts_batch2 <- na.omit(counts_batch2)
+# 
+# #Remove duplicate names
+# counts_batch1 <- counts_batch1[!duplicated(counts_batch1[, 1]), ]
+# genes <- counts_batch1[, 1]
+# rownames(counts_batch1) <- genes
+# counts_batch1 <- counts_batch1[, -1]
+# 
+# counts_batch2 <- counts_batch2[!duplicated(counts_batch2[, 1]), ]
+# genes <- counts_batch2[, 1]
+# rownames(counts_batch2) <- genes
+# counts_batch2 <- counts_batch2[, -1]
+# 
+# #Combine data
+# 
+# # Merge counts by row (gene), matching common genes between both batches
+# combined_counts <- merge(counts_batch1, counts_batch2, by="row.names", all=TRUE)
+# 
+# # Set rownames back to genes
+# rownames(combined_counts) <- combined_counts$Row.names
+# combined_counts <- combined_counts[, -1]
+# 
+# # Preview the combined dataset
+# head(combined_counts)
 
 # Select columns in combined_counts that match the remaining sample names in meta_combined
 combined_counts <- combined_counts[, meta_combined$Samples]  # Ensure Sample_IDs match column names in 
@@ -300,28 +286,30 @@ results_Early <- results_Early[order(results_Early$log2FoldChange, decreasing = 
 lfc_vector_early <- setNames(results_Early$log2FoldChange, results_Early$gene)
 
 
+# CellTypes Pathways
 
 #BiocManager::install("clusterProfiler")
 library(clusterProfiler)
 biocarta_gene_sets <- msigdbr(species="Mus musculus", category="C8") # Large df w/ categories
 mm_hallmark_sets <- split(biocarta_gene_sets$gene_symbol, # Genes to split into pathways, by ensembl
                       biocarta_gene_sets$gs_name) # Pathway names
+mm_hallmark_df <- data.frame(
+  gs_name = rep(names(mm_hallmark_sets), sapply(mm_hallmark_sets, length)),  # Pathway names
+  gene_symbol = unlist(mm_hallmark_sets)  # Flatten the list into a single vector
+)
 # Define the keywords of interest
-keywords <- c("T_cell", "NK", "Macrophage", "Monocyte", "Dendritic", 
-              "DC", "NKT", "Neutrophil", "B_cell", "myeloid", "lymphoid","lymphocyte","mast_cell","Antigen_presenting_cell","Immune")
-
-# Filter the gene sets
-filtered_mm_hallmark_sets <- mm_hallmark_sets[grepl(paste(keywords, collapse = "|"), names(mm_hallmark_sets), ignore.case = TRUE)]
+# keywords <- c("T_cell", "NK", "Macrophage", "Monocyte", "Dendritic", 
+#               "DC", "NKT", "Neutrophil", "B_cell", "myeloid", "lymphoid","lymphocyte","mast_cell","Antigen_presenting_cell","Immune")
+# 
+# # Filter the gene sets
+# filtered_mm_hallmark_sets <- mm_hallmark_sets[grepl(paste(keywords, collapse = "|"), names(mm_hallmark_sets), ignore.case = TRUE)]
 
 # Check the structure of mm_hallmark_sets
 #str(mm_hallmark_sets)
 # If mm_hallmark_sets is a list, convert it to a data frame
 # Replace `your_data` with the appropriate structure that holds the gene sets.
 # Convert the list to a data frame
-mm_hallmark_df <- data.frame(
-  gs_name = rep(names(mm_hallmark_sets), sapply(mm_hallmark_sets, length)),  # Pathway names
-  gene_symbol = unlist(mm_hallmark_sets)  # Flatten the list into a single vector
-)
+
 # Check the structure of the new data frame
 #str(mm_hallmark_df)
 # Perform GSEA for Islet
@@ -353,6 +341,71 @@ color_gradient <- scale_fill_gradient2(
 )
 
 ggplot(gsea_results_early_df, aes(x = reorder(Description, NES), y = NES, fill = NES)) +
+     geom_bar(stat = "identity", show.legend = TRUE) +
+     coord_flip() +
+     color_gradient +
+     labs(title = "Top GSEA Results for Early Timepoint",
+          x = "Pathway",
+          y = "Normalized Enrichment Score (NES)") +
+     theme_minimal(base_size = 14) +
+     theme(
+         plot.title = element_text(hjust = 0.7, size = 20, face = "bold"),
+         axis.title = element_text(size = 19),
+         axis.text = element_text(size = 12),
+         panel.grid.major = element_line(color = "grey90"),
+         panel.grid.minor = element_blank(),
+         legend.position = "bottom"
+     )
+
+# Metabolic Pathways
+sets_hallmark <- msigdbr(species="Mus musculus", category="H") # Large df w/ categories
+pwl_hallmark <- split(sets_hallmark$gene_symbol, # Genes to split into pathways, by ensembl
+                      sets_hallmark$gs_name) # Pathway names
+# sets_reactome <- msigdbr(species="Mus musculus", subcategory="CP:REACTOME") # Large df w/ categories
+# pwl_reactome <- split(sets_reactome$gene_symbol, # Genes to split into pathways, by ensembl
+#                       sets_reactome$gs_name) # Pathway names
+kegg_gene_sets <- msigdbr(species="Mus musculus", subcategory="CP:KEGG") # Large df w/ categories
+pwl_kegg <- split(kegg_gene_sets$gene_symbol, # Genes to split into pathways, by ensembl
+                  kegg_gene_sets$gs_name) # Pathway names
+# biocarta_gene_sets <- msigdbr(species="Mus musculus", subcategory="CP:BIOCARTA") # Large df w/ categories
+# pwl_biocarta <- split(biocarta_gene_sets$gene_symbol, # Genes to split into pathways, by ensembl
+#                       biocarta_gene_sets$gs_name) # Pathway names
+pwl_msigdbr <- c(pwl_hallmark, pwl_kegg) # Compile them all
+length(pwl_msigdbr)
+
+mm_metabolism_df <- data.frame(
+  gs_name = rep(names(pwl_msigdbr), sapply(pwl_msigdbr, length)),  # Pathway names
+  gene_symbol = unlist(pwl_msigdbr)  # Flatten the list into a single vector
+)
+
+gsea_results_early_metab <- GSEA(
+  geneList = lfc_vector_early, # Your ordered ranked gene list for Islet
+  minGSSize = 5, # Minimum gene set size
+  maxGSSize = 500, # Maximum gene set size
+  pvalueCutoff = 1, # p-value cutoff
+  eps = 0, # Boundary for calculating the p value
+  seed = TRUE, # Set seed for reproducibility
+  pAdjustMethod = "BH", # Benjamini-Hochberg correction
+  TERM2GENE = mm_metabolism_df  # Use the new data frame
+)
+
+# Extract results for Islet
+gsea_results_early_metab_df <- as.data.frame(gsea_results_early_metab)
+
+
+library(ggplot2)
+
+# Color gradient function for NES
+color_gradient <- scale_fill_gradient2(
+  low = "red",      # Low NES values (negative)
+  mid = "white",    # Midpoint (zero)
+  high = "blue",    # High NES values (positive)
+  midpoint = 0,
+  limits = c(min(gsea_results_early_metab_df$NES), max(gsea_results_early_metab_df$NES)),
+  name = "NES"
+)
+
+ggplot(gsea_results_early_metab_df, aes(x = reorder(Description, NES), y = NES, fill = NES)) +
      geom_bar(stat = "identity", show.legend = TRUE) +
      coord_flip() +
      color_gradient +
@@ -469,6 +522,53 @@ ggplot(gsea_results_intermediate_df, aes(x = reorder(Description, NES), y = NES,
          legend.position = "bottom"
      )
 
+# Metabolism Pathways
+
+
+gsea_results_intermediate_metab <- GSEA(
+  geneList = lfc_vector_intermediate, # Your ordered ranked gene list for Islet
+  minGSSize = 5, # Minimum gene set size
+  maxGSSize = 500, # Maximum gene set size
+  pvalueCutoff = 1, # p-value cutoff
+  eps = 0, # Boundary for calculating the p value
+  seed = TRUE, # Set seed for reproducibility
+  pAdjustMethod = "BH", # Benjamini-Hochberg correction
+  TERM2GENE = mm_metabolism_df  # Use the new data frame
+)
+
+# Extract results for Islet
+gsea_results_intermediate_metab_df <- as.data.frame(gsea_results_intermediate_metab)
+
+
+library(ggplot2)
+
+# Color gradient function for NES
+color_gradient <- scale_fill_gradient2(
+  low = "red",      # Low NES values (negative)
+  mid = "white",    # Midpoint (zero)
+  high = "blue",    # High NES values (positive)
+  midpoint = 0,
+  limits = c(min(gsea_results_intermediate_metab_df$NES), max(gsea_results_intermediate_metab_df$NES)),
+  name = "NES"
+)
+
+ggplot(gsea_results_intermediate_metab_df, aes(x = reorder(Description, NES), y = NES, fill = NES)) +
+     geom_bar(stat = "identity", show.legend = TRUE) +
+     coord_flip() +
+     color_gradient +
+     labs(title = "Top GSEA Results for Intermediate Timepoint",
+          x = "Pathway",
+          y = "Normalized Enrichment Score (NES)") +
+     theme_minimal(base_size = 14) +
+     theme(
+         plot.title = element_text(hjust = 0.7, size = 20, face = "bold"),
+         axis.title = element_text(size = 19),
+         axis.text = element_text(size = 12),
+         panel.grid.major = element_line(color = "grey90"),
+         panel.grid.minor = element_blank(),
+         legend.position = "bottom"
+     )
+
 ```
 ### Late Stage Analysis
 ```{r GSEALate, echo=FALSE}
@@ -567,12 +667,59 @@ ggplot(gsea_results_late_df, aes(x = reorder(Description, NES), y = NES, fill = 
          legend.position = "bottom"
      )
 
+
+# Metabolism Pathways
+
+
+gsea_results_late_metab <- GSEA(
+  geneList = lfc_vector_late, # Your ordered ranked gene list for Islet
+  minGSSize = 5, # Minimum gene set size
+  maxGSSize = 500, # Maximum gene set size
+  pvalueCutoff = 1, # p-value cutoff
+  eps = 0, # Boundary for calculating the p value
+  seed = TRUE, # Set seed for reproducibility
+  pAdjustMethod = "BH", # Benjamini-Hochberg correction
+  TERM2GENE = mm_metabolism_df  # Use the new data frame
+)
+
+# Extract results for Islet
+gsea_results_late_metab_df <- as.data.frame(gsea_results_late_metab)
+
+# Color gradient function for NES
+color_gradient <- scale_fill_gradient2(
+  low = "red",      # Low NES values (negative)
+  mid = "white",    # Midpoint (zero)
+  high = "blue",    # High NES values (positive)
+  midpoint = 0,
+  limits = c(min(gsea_results_late_metab_df$NES), max(gsea_results_late_metab_df$NES)),
+  name = "NES"
+)
+
+ggplot(gsea_results_late_metab_df, aes(x = reorder(Description, NES), y = NES, fill = NES)) +
+     geom_bar(stat = "identity", show.legend = TRUE) +
+     coord_flip() +
+     color_gradient +
+     labs(title = "Top GSEA Results for late Timepoint",
+          x = "Pathway",
+          y = "Normalized Enrichment Score (NES)") +
+     theme_minimal(base_size = 14) +
+     theme(
+         plot.title = element_text(hjust = 0.7, size = 20, face = "bold"),
+         axis.title = element_text(size = 19),
+         axis.text = element_text(size = 12),
+         panel.grid.major = element_line(color = "grey90"),
+         panel.grid.minor = element_blank(),
+         legend.position = "bottom"
+     )
+
 ```
 
 
 ### Combined Analysis for Final Plot
 
 ```{r GSEAFinalDotPlot, echo=FALSE}
+
+#CellType Enrichment
 # Add prefixes to column names to identify the source of each data frame
 names(gsea_results_early_df)[-1] <- paste0("early_", names(gsea_results_early_df)[-1])
 names(gsea_results_intermediate_df)[-1] <- paste0("intermediate_", names(gsea_results_intermediate_df)[-1])
@@ -591,4 +738,19 @@ write.csv(combined_gsea_df, "CellType_combined_gsea_results.csv", row.names = FA
 # Confirm the file location
 cat("File saved as 'combined_gsea_results.csv' in the working directory.")
 
+#Pathway Enrichment
+# Add prefixes to column names to identify the source of each data frame
+names(gsea_results_early_metab_df)[-1] <- paste0("early_", names(gsea_results_early_metab_df)[-1])
+names(gsea_results_intermediate_metab_df)[-1] <- paste0("intermediate_", names(gsea_results_intermediate_metab_df)[-1])
+names(gsea_results_late_metab_df)[-1] <- paste0("late_", names(gsea_results_late_metab_df)[-1])
+
+# Merge the three data frames based on the 'Description' column
+combined_gsea_metab_df <- Reduce(function(x, y) merge(x, y, by = "ID"), 
+                           list(gsea_results_early_metab_df, gsea_results_intermediate_metab_df, gsea_results_late_metab_df))
+
+# View the combined data frame
+head(combined_gsea_metab_df)
+
+# Save the combined data frame to a CSV file
+write.csv(combined_gsea_metab_df, "MetabolicPathways_combined_gsea_results.csv", row.names = FALSE)
 ```
