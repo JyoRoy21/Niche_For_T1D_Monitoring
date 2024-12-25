@@ -409,6 +409,7 @@ ggplot(gsea_results_early_metab_df, aes(x = reorder(Description, NES), y = NES, 
 
 
 ### Intermediate Stage Analysis
+
 ```{r GSEAIntermediate, echo=FALSE}
 # Filter Data for time
 meta_combined_intermediate <- meta_combined[meta_combined$Time == "Intermediate", ]
@@ -664,7 +665,7 @@ ggplot(gsea_results_late_metab_df, aes(x = reorder(Description, NES), y = NES, f
 ```
 
 
-### Combined Analysis for Final Plot
+### Combining Dataframes from three timepoints
 
 ```{r GSEAFinalObject, echo=FALSE}
 
@@ -739,7 +740,7 @@ cat("Filtered file saved as 'Filtered_GSEA_metab_results.csv' in the working dir
 ```
 
 
-# DotPlot-Metabolic Pathways
+### DotPlot-Metabolic Pathways
 ```{r DotPlotMetabolsim, echo=FALSE}
 # Load necessary libraries
 library(ggplot2)
@@ -789,7 +790,7 @@ ggplot(filtered_gsea_metab_top20, aes(x = timepoint, y = reorder(ID, NES))) +
 
 ```
 
-#DotPlot-CellTypeEnrichment
+### DotPlot-CellTypeEnrichment
 
 ```{r DotPlot, echo=FALSE}
 # Load necessary libraries
