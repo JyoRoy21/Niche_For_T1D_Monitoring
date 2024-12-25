@@ -104,24 +104,7 @@ combined_counts <- combined_counts[, -1]
 head(combined_counts)
 
 
-#### Start Analysis ####
-# meta_combined$Group <- ifelse(meta_combined$Group == "Healthy", 
-#                               paste0("Healthy_", meta_combined$Day), 
-#                               meta_combined$Group)
-
-# meta_combined$Group <- ifelse(meta_combined$Group == "Progressor", 
-#                                paste0("Progressor_", meta_combined$Time), 
-#                                paste0("Non-Progressor_", meta_combined$Time))
-# Filter out "Rejected" samples from meta_combined
-#meta_combined <- meta_combined[meta_combined$Group != "Rejected", ]
-
-# Select columns in combined_counts that match the remaining sample names in meta_combined
-#combined_counts <- combined_counts[, meta_combined$Samples]  # Ensure Sample_IDs match column names in combined_counts
-# 
-# case1_f1 <- flexiDEG.function1(combined_counts, meta_combined, # Run Function 1
-#                          convert_genes = F, exclude_riken = T, exclude_pseudo = F,
-#                          batches = T, quality = T, variance = F,use_pseudobulk = F) # Select filters: 2, 0, 15
-# 
+ 
 
 
 ```
@@ -361,17 +344,17 @@ ggplot(gsea_results_early_df, aes(x = reorder(Description, NES), y = NES, fill =
 sets_hallmark <- msigdbr(species="Mus musculus", category="H") # Large df w/ categories
 pwl_hallmark <- split(sets_hallmark$gene_symbol, # Genes to split into pathways, by ensembl
                       sets_hallmark$gs_name) # Pathway names
-# sets_reactome <- msigdbr(species="Mus musculus", subcategory="CP:REACTOME") # Large df w/ categories
-# pwl_reactome <- split(sets_reactome$gene_symbol, # Genes to split into pathways, by ensembl
-#                       sets_reactome$gs_name) # Pathway names
+sets_reactome <- msigdbr(species="Mus musculus", subcategory="CP:REACTOME") # Large df w/ categories
+pwl_reactome <- split(sets_reactome$gene_symbol, # Genes to split into pathways, by ensembl
+                       sets_reactome$gs_name) # Pathway names
 kegg_gene_sets <- msigdbr(species="Mus musculus", subcategory="CP:KEGG") # Large df w/ categories
 pwl_kegg <- split(kegg_gene_sets$gene_symbol, # Genes to split into pathways, by ensembl
                   kegg_gene_sets$gs_name) # Pathway names
 # biocarta_gene_sets <- msigdbr(species="Mus musculus", subcategory="CP:BIOCARTA") # Large df w/ categories
 # pwl_biocarta <- split(biocarta_gene_sets$gene_symbol, # Genes to split into pathways, by ensembl
-#                       biocarta_gene_sets$gs_name) # Pathway names
-pwl_msigdbr <- c(pwl_hallmark, pwl_kegg) # Compile them all
-length(pwl_msigdbr)
+#                        biocarta_gene_sets$gs_name) # Pathway names
+pwl_msigdbr <- c(pwl_hallmark, pwl_kegg,pwl_reactome,pwl_reactome) # Compile them all
+length(pwl_reactome)
 
 mm_metabolism_df <- data.frame(
   gs_name = rep(names(pwl_msigdbr), sapply(pwl_msigdbr, length)),  # Pathway names
@@ -458,25 +441,9 @@ results_intermediate <- results_intermediate[, c("gene", "log2FoldChange", "padj
 results_intermediate <- results_intermediate[!is.na(results_intermediate$log2FoldChange), ]
 results_intermediate <- results_intermediate[order(results_intermediate$log2FoldChange, decreasing = TRUE), ]
 lfc_vector_intermediate <- setNames(results_intermediate$log2FoldChange, results_intermediate$gene)
-#lfc_vector_intermediate <- lfc_vector_intermediate[lfc_vector_intermediate != 0]
 
 
-# #BiocManager::install("clusterProfiler")
-# library(clusterProfiler)
-# biocarta_gene_sets <- msigdbr(species="Mus musculus", category="C8") # Large df w/ categories
-# mm_hallmark_sets <- split(biocarta_gene_sets$gene_symbol, # Genes to split into pathways, by ensembl
-#                       biocarta_gene_sets$gs_name) # Pathway names
-# # Check the structure of mm_hallmark_sets
-# #str(mm_hallmark_sets)
-# # If mm_hallmark_sets is a list, convert it to a data frame
-# # Replace `your_data` with the appropriate structure that holds the gene sets.
-# # Convert the list to a data frame
-# mm_hallmark_df <- data.frame(
-#   gs_name = rep(names(mm_hallmark_sets), sapply(mm_hallmark_sets, length)),  # Pathway names
-#   gene_symbol = unlist(mm_hallmark_sets)  # Flatten the list into a single vector
-# )
-# Check the structure of the new data frame
-#str(mm_hallmark_df)
+
 # Perform GSEA for Islet
 gsea_results_intermediate <- GSEA(
   geneList = lfc_vector_intermediate, # Your ordered ranked gene list for Islet
@@ -603,25 +570,7 @@ results_late <- results_late[, c("gene", "log2FoldChange", "padj")]
 results_late <- results_late[!is.na(results_late$log2FoldChange), ]
 results_late <- results_late[order(results_late$log2FoldChange, decreasing = TRUE), ]
 lfc_vector_late <- setNames(results_late$log2FoldChange, results_late$gene)
-#lfc_vector_late <- lfc_vector_late[lfc_vector_late != 0]
 
-
-#BiocManager::install("clusterProfiler")
-#library(clusterProfiler)
-#biocarta_gene_sets <- msigdbr(species="Mus musculus", category="C8") # Large df w/ categories
-# mm_hallmark_sets <- split(biocarta_gene_sets$gene_symbol, # Genes to split into pathways, by ensembl
-#                       biocarta_gene_sets$gs_name) # Pathway names
-# Check the structure of mm_hallmark_sets
-#str(mm_hallmark_sets)
-# If mm_hallmark_sets is a list, convert it to a data frame
-# Replace `your_data` with the appropriate structure that holds the gene sets.
-# Convert the list to a data frame
-# mm_hallmark_df <- data.frame(
-#   gs_name = rep(names(mm_hallmark_sets), sapply(mm_hallmark_sets, length)),  # Pathway names
-#   gene_symbol = unlist(mm_hallmark_sets)  # Flatten the list into a single vector
-# )
-# Check the structure of the new data frame
-#str(mm_hallmark_df)
 # Perform GSEA for Islet
 gsea_results_late <- GSEA(
   geneList = lfc_vector_late, # Your ordered ranked gene list for Islet
@@ -717,7 +666,7 @@ ggplot(gsea_results_late_metab_df, aes(x = reorder(Description, NES), y = NES, f
 
 ### Combined Analysis for Final Plot
 
-```{r GSEAFinalDotPlot, echo=FALSE}
+```{r GSEAFinalObject, echo=FALSE}
 
 #CellType Enrichment
 # Add prefixes to column names to identify the source of each data frame
@@ -738,7 +687,24 @@ write.csv(combined_gsea_df, "CellType_combined_gsea_results.csv", row.names = FA
 # Confirm the file location
 cat("File saved as 'combined_gsea_results.csv' in the working directory.")
 
-#Pathway Enrichment
+# Filter pathways where NES >= 1.5 or <= -1.5 AND pvalue < 0.05 for any condition
+filtered_gsea_df <- combined_gsea_df[
+  ((combined_gsea_df$early_NES >= 1.5 | combined_gsea_df$early_NES <= -1.5) & combined_gsea_df$early_pvalue < 0.05) |
+  ((combined_gsea_df$intermediate_NES >= 1.5 | combined_gsea_df$intermediate_NES <= -1.5) & combined_gsea_df$intermediate_pvalue < 0.05) |
+  ((combined_gsea_df$late_NES >= 1.5 | combined_gsea_df$late_NES <= -1.5) & combined_gsea_df$late_pvalue < 0.05),
+]
+
+# View the filtered data
+head(filtered_gsea_df)
+
+# Save the filtered data frame to a CSV file
+write.csv(filtered_gsea_df, "Filtered_CellType_GSEA_results.csv", row.names = FALSE)
+
+# Confirm the file location
+cat("Filtered file saved as 'Filtered_CellType_GSEA_results.csv' in the working directory.")
+
+# Metabolic and Immune Pathway Enrichment 
+
 # Add prefixes to column names to identify the source of each data frame
 names(gsea_results_early_metab_df)[-1] <- paste0("early_", names(gsea_results_early_metab_df)[-1])
 names(gsea_results_intermediate_metab_df)[-1] <- paste0("intermediate_", names(gsea_results_intermediate_metab_df)[-1])
@@ -753,4 +719,123 @@ head(combined_gsea_metab_df)
 
 # Save the combined data frame to a CSV file
 write.csv(combined_gsea_metab_df, "MetabolicPathways_combined_gsea_results.csv", row.names = FALSE)
+
+# Subset pathways where NES >= 1.5 or <= -1.5 AND pvalue < 0.05 for any condition
+filtered_gsea_metab_df <- combined_gsea_metab_df[
+  ((combined_gsea_metab_df$early_NES >= 1.5 | combined_gsea_metab_df$early_NES <= -1.5) & combined_gsea_metab_df$early_pvalue < 0.05) |
+  ((combined_gsea_metab_df$intermediate_NES >= 1.5 | combined_gsea_metab_df$intermediate_NES <= -1.5) & combined_gsea_metab_df$intermediate_pvalue < 0.05) |
+  ((combined_gsea_metab_df$late_NES >= 1.5 | combined_gsea_metab_df$late_NES <= -1.5) & combined_gsea_metab_df$late_pvalue < 0.05),
+]
+
+# View the filtered data
+head(filtered_gsea_metab_df)
+
+# Save the filtered data to a CSV file
+write.csv(filtered_gsea_metab_df, "Filtered_GSEA_metab_results.csv", row.names = FALSE)
+
+# Confirm the file location
+cat("Filtered file saved as 'Filtered_GSEA_metab_results.csv' in the working directory.")
+
+```
+
+
+# DotPlot-Metabolic Pathways
+```{r DotPlotMetabolsim, echo=FALSE}
+# Load necessary libraries
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+
+# Reshape the data into long format for plotting
+filtered_gsea_metab_long <- filtered_gsea_metab_df %>%
+  select(ID, starts_with("early_"), starts_with("intermediate_"), starts_with("late_")) %>%
+  pivot_longer(
+    cols = -ID,
+    names_to = c("timepoint", ".value"),
+    names_pattern = "(early|intermediate|late)_(.+)"
+  )
+
+# Calculate bubble size as -log10(pvalue)
+filtered_gsea_metab_long <- filtered_gsea_metab_long %>%
+  mutate(bubble_size = -log10(p.adjust))
+
+set.seed(123) # For reproducibility
+top_20_pathways <- sample(unique(filtered_gsea_metab_long$ID), 30)
+
+
+filtered_gsea_metab_top20 <- filtered_gsea_metab_long %>%
+  filter(ID %in% top_20_pathways)
+
+ggplot(filtered_gsea_metab_top20, aes(x = timepoint, y = reorder(ID, NES))) +
+  geom_point(aes(size = bubble_size, color = NES)) +
+  scale_color_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0) +  # NES color gradient
+  scale_size(range = c(2, 10)) +  # Bubble size range
+  theme_minimal() +
+  labs(
+    title = "Top 20 GSEA Pathways Across Timepoints",
+    x = "Timepoint",
+    y = "Pathway",
+    size = "-log10(p-value)",
+    color = "NES"
+  ) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 15),
+    axis.text.y = element_text(size = 12),  # Adjust y-axis text size for readability
+    axis.title.x = element_text(size = 14),  # Increase x-axis title size
+    axis.title.y = element_text(size = 14),  # Increase y-axis title size
+    legend.position = "right",
+    plot.title = element_text(size = 16, face = "bold")  # Increase plot title size
+  )
+
+```
+
+#DotPlot-CellTypeEnrichment
+
+```{r DotPlot, echo=FALSE}
+# Load necessary libraries
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+
+# Reshape the data into long format for plotting
+filtered_gsea_celltype_long <- filtered_gsea_df  %>%
+  select(ID, starts_with("early_"), starts_with("intermediate_"), starts_with("late_")) %>%
+  pivot_longer(
+    cols = -ID,
+    names_to = c("timepoint", ".value"),
+    names_pattern = "(early|intermediate|late)_(.+)"
+  )
+
+# Calculate bubble size as -log10(pvalue)
+filtered_gsea_celltype_long <- filtered_gsea_celltype_long %>%
+  mutate(bubble_size = -log10(p.adjust))
+
+set.seed(123) # For reproducibility
+top_20_pathways <- sample(unique(filtered_gsea_celltype_long$ID), 30)
+
+
+filtered_gsea_celltype_long_top20 <- filtered_gsea_celltype_long%>%
+  filter(ID %in% top_20_pathways)
+
+ggplot(filtered_gsea_celltype_long_top20, aes(x = timepoint, y = reorder(ID, NES))) +
+  geom_point(aes(size = bubble_size, color = NES)) +
+  scale_color_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0) +  # NES color gradient
+  scale_size(range = c(2, 10)) +  # Bubble size range
+  theme_minimal() +
+  labs(
+    title = "Top 20 GSEA CellType Enrichment Across Timepoints",
+    x = "Timepoint",
+    y = "Pathway",
+    size = "-log10(p-value)",
+    color = "NES"
+  ) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 15),
+    axis.text.y = element_text(size = 12),  # Adjust y-axis text size for readability
+    axis.title.x = element_text(size = 14),  # Increase x-axis title size
+    axis.title.y = element_text(size = 14),  # Increase y-axis title size
+    legend.position = "right",
+    plot.title = element_text(size = 16, face = "bold")  # Increase plot title size
+  )
+
 ```
