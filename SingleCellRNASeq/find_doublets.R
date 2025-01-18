@@ -84,8 +84,8 @@ find_doublets <- function(seu_object, sample_name, data_dir, sample_dir, save_op
   mouse.singlets
   
   # clean environment 
-  remove(sweep.stats, sweep.list, mouse.sample, mouse.filtered, metadata, bcmvn.max, bcmvn)
-  
+  remove(sweep.stats, sweep.list, mouse.sample,  metadata, bcmvn.max, bcmvn)
+  #mouse.filtered removed from above
   if (save_opt == TRUE) {
     saveRDS(mouse.singlets, file = paste0("./Data/remove_doublet_filt_", sample, ".rds"))
   }
