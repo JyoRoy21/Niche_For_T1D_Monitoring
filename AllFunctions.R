@@ -188,7 +188,7 @@ flexiDEG.function1 <- function(counts, # Counts df, genes=rows & samples=cols,
     Batch <- metadata$Batch 
     coldata <- data.frame(cbind(groups, Batch)) # Combine groups and batch 
     row.names(coldata) <- sample_names # DESeq2 uses raw counts; rows:genes & cols:samples
-    dds <- DESeqDataSetFromMatrix(countData = counts, colData = coldata, design = ~ Batch+groups)
+    dds <- DESeqDataSetFromMatrix(countData = counts, colData = coldata, design = ~ Batch)
     paste(nrow(dds), " genes input for batch correction", sep="")
     suppressMessages(dds <- DESeq(dds)) # Analyze previously specified variables
     vsd <- vst(dds, blind = FALSE) # Estimates dispersion trend & stabilizes transformation
@@ -312,6 +312,63 @@ flexiDEG.function1 <- function(counts, # Counts df, genes=rows & samples=cols,
   }
   return(counts_filt) # Final function 1 output
 }
+
+
+
+flexiDEG_ttest <- function(counts_filt, # df w/ genes as rownames, Function 1 output
+                           metadata, sig_cutoff = NULL) {
+  # Transpose if cols=genes
+  if (ncol(counts_filt) > nrow(counts_filt)) { 
+    counts_filt <- t(counts_filt) 
+  } 
+  
+  # Extract sample groups
+  groups <- metadata$Group 
+  groups <- factor(groups, levels = unique(groups), labels = unique(groups)) 
+  
+  # Check number of groups
+  num_groups <- length(unique(groups))
+  
+  # Perform t-test or ANOVA based on number of groups
+  gene_pvals <- apply(counts_filt, 1, function(gene_row) { 
+    if (num_groups == 2) {
+      # Use t-test for two groups
+      set.seed(123)
+      ttest_result <- t.test(gene_row ~ groups)
+      return(ttest_result$p.value)
+    } else {
+      # Use ANOVA for three or more groups
+      aov_result <- aov(gene_row ~ groups)
+      return(summary(aov_result)[[1]]$`Pr(>F)`[1])
+    }
+  })
+  
+  # Create dataframe for genes and p-values
+  gene_pvals <- data.frame(gene = row.names(counts_filt), p_val = gene_pvals) 
+  
+  # Set default significance cutoff if not provided
+  if (is.null(sig_cutoff)) { 
+    sig_cutoff <- 0.05 
+  } 
+  
+  # Filter results by p-value
+  gene_sig <- gene_pvals[gene_pvals$p_val < sig_cutoff, ] 
+  counts_filtered <- counts_filt[gene_sig$gene,]
+  
+  # Determine message based on whether rownames indicate pathways or genes
+  if (sum(grepl("[_ ]", rownames(counts_filt))) >= 5) {
+    test_type <- ifelse(num_groups == 2, "t-test", "ANOVA")
+    print(paste(test_type, "performed for", num_groups, "groups with", 
+                nrow(counts_filtered), "significant pathways"))
+  } else {
+    test_type <- ifelse(num_groups == 2, "t-test", "ANOVA")
+    print(paste(test_type, "performed for", num_groups, "groups with", 
+                nrow(counts_filtered), "significant genes"))
+  }
+  
+  return(counts_filtered) # Return significant results
+}
+
 
 # In the second function, we perform ANOVA by sample groups.
 flexiDEG.function2 <- function(counts_filt, # df w/ genes as rownames, Function 1 output
@@ -966,7 +1023,7 @@ flexiDEG.ENbootstrap <- function(counts_filt, metadata) { # n >= 10 sample size
     #Calculate the alpha value
     alpha_val <- (i - 1) * 0.05
     # Perform bootstrapping with bagging
-    num_iters <-num_bootstrap_samples/10   # Number of bootstrap samples  for initial alpha selection
+    num_iters <-num_bootstrap_samples   # Number of bootstrap samples  for initial alpha selection
     auc_bootstrap <- vector("numeric", length = num_iters)
     micro_tpr_bootstrap <- vector("list", length = num_iters)
     micro_fpr_bootstrap <- vector("list", length = num_iters)
