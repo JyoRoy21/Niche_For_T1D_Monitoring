@@ -254,3 +254,463 @@ ggsave(file = "UMAP_CellTypeclusters_Week18.png",
 
 saveRDS(int.T1D_Week18, file = "./annotated_int.T1D_Week18_v3.rds")
 
+
+## ----T Cell subclustering---------------------------------------------------------------------------------------------------------------------------------------
+
+int.T1D_Week18 = FindSubCluster(
+  object = int.T1D_Week18,
+  cluster = "T Cell",
+  graph.name = "SCT_nn",
+  resolution = 0.5,
+  subcluster.name = "T Cell Subtypes",
+  algorithm = 2
+)
+
+unique(T1D_Timepoints$`T Cell Subtypes`)
+
+#Idents(T1D_Timepoints) = T1D_Timepoints$`T Cell Subtypes`
+
+#DimPlot(T1D_Timepoints, reduction = "umap", group.by = , combine = F, label = T)
+
+
+
+Tcells_w18 = subset(x = int.T1D_Week18, idents = "T Cell")
+ElbowPlot(Tcells_w18, ndims = 50)
+
+Tcells_w18 <- FindNeighbors(Tcells_w18, dims = 1:30, verbose = F,reduction = "integrated.dr")
+Tcells_w18 <- FindClusters(Tcells_w18,graph.name = "SCT_nn", res = 0.7)#graph.name = "SCT_nn"
+Tcells_w18 <- RunUMAP(Tcells_w18, dims = 1:30,reduction = "integrated.dr")
+
+DimPlot(Tcells_w18, reduction = "umap", combine = F, label = T)
+DimPlot(Tcells_w18, reduction = "umap", combine = F, label = T,group.by = ("sample"))
+
+get_conserved <- function(cluster){
+  Seurat::FindConservedMarkers(Tcells_w18,
+                               ident.1 = cluster,
+                               grouping.var = "sample",
+                               only.pos = TRUE) %>%
+    rownames_to_column(var = "gene")  %>%
+    #left_join(y = unique(annotations[, c("gene_name", "description")]),
+    #          by = c("gene" = "gene_name")) %>%
+    cbind(cluster_id = cluster, .)
+}
+unique(Idents(Tcells_w18))
+
+conserved_markers.Tcells_w18 <- map_dfr(0:10, get_conserved)
+conserved_markers.Tcells_w18[is.na(conserved_markers.Tcells_w18)] <- 0
+head(conserved_markers.Tcells_w18)
+
+DefaultAssay(Tcells_w18) = "SCT"
+
+# Extract top 10 markers per cluster
+top20_TCells_w18 <- conserved_markers.Tcells_w18 %>% 
+  mutate(avg_fc = (`Week18_1_avg_log2FC` + 
+                     `Week18_2_avg_log2FC` + 
+                     `Week18_3_avg_log2FC` +
+                     `Week18_4_avg_log2FC` +
+                     `Week18_5_avg_log2FC` +
+                     `Week18_6_avg_log2FC`) /10) %>% 
+  group_by(cluster_id) %>% 
+  top_n(n = 20, 
+        wt = avg_fc)
+
+
+Tcells_w18 <- PrepSCTFindMarkers(Tcells_w18)
+all.markers <- FindAllMarkers(Tcells_w18 , only.pos = TRUE,recorrect_umi = FALSE)
+
+top20_sct_Tcell_w18=all.markers %>% 
+  group_by(cluster) %>% 
+  top_n(n = 20, 
+        wt = avg_log2FC)
+
+# Save the top 20 markers grouped by cluster as a CSV file
+write.csv(top20_sct_Tcell_w18, file = "top20_sct_Tcells_Week18.csv", row.names = FALSE)
+
+
+DotPlot(Tcells_w18,assay = "SCT", features = c( "Tnfrsf4","Tbc1d4","Cd4", #CD4
+                                            "Cd8a","Cd8b1","Blk",#CD8
+                                            "Ccr7","Il7r","Lef1","Sell",#Memory
+                                            "Gzma","Gzmb","Klrg1","Tbx21","Zeb2",#SLEC
+                                            "Ccl5", "Gzmk", "Klrc1", "Nkg7", "Cd38", "Cxcr3", "Cxcr6", "Fasl", "Ifng",#CD8 Effector
+                                            "Cd40lg","Il6ra",#Tcon effector
+                                            "Nt5e","Izumo1r",#Anergy
+                                            "Slamf6","Tcf7",#Progenitor
+                                            "Cd200","Il21","Tnfsf8", #Th21
+                                            "Rora","Stat3", "Ccr6",#Th17
+                                            "Bcl6","Cxcr5","Tox2",#Tfh
+                                            "Ctla4","Foxp3","Icos","Ikzf2","Il2ra","Tigit",#Tregs
+                                            "Cd69","Egr1","Egr2","Nr4a1",#Activation
+                                            "Ifit1","Ifit3","Isg15","Stat1",#Interferon sensing
+                                            "Mki67","Stmn1",#Proliferation
+                                            "Tox","Pdcd1","Lag3",#Exhaustion
+                                            "Klrb1b","Klra8","Klrb1a","Eomes","Ncr1","Klre1", #NK
+                                            "Tcrg-C2",#Gamm_Delta-,"Trac","Cd3e"
+                                            "Hs3st1","Gata3",#ILC2
+                                            "Hebp1","Ncoa7","Cd74","Cited4","H2-Ab1","Rorc"#ILC3
+                                            
+                                            
+)) + 
+  RotatedAxis() + scale_colour_gradient2(low = "blue", mid = "grey", high = "red")
+
+# Check average expression of Nkg7 per cluster
+AverageExpression(Tcells_w18, features = "Cd8b1", group.by = "seurat_clusters")
+
+
+# Extract top genes for cluster 4
+cluster_4_genes <- top20_sct_Tcell_w18  %>% 
+  filter(cluster == 4) %>% 
+  pull(gene)
+# Print genes for cluster 0
+cat("Top 20 genes for Cluster 4:\n")
+print(cluster_4_genes)
+cluster_4 <- top20_sct_Tcell_w18  %>% 
+  filter(cluster == 4)
+cluster_4
+
+# Extract top genes for cluster 5
+cluster_5_genes <- top20_sct_Tcell_w18  %>% 
+  filter(cluster == 5) %>% 
+  pull(gene)
+# Print genes for cluster 0
+cat("Top 20 genes for Cluster 5:\n")
+print(cluster_5_genes)
+cluster_5 <- top20_sct_Tcell_w18  %>% 
+  filter(cluster == 5)
+
+# Extract top genes for cluster 6
+cluster_6_genes <- top20_sct_Tcell_w18  %>% 
+  filter(cluster == 6) %>% 
+  pull(gene)
+# Print genes for cluster 6
+cat("Top 20 genes for Cluster 6:\n")
+print(cluster_6_genes)
+cluster_6 <- top20_sct_Tcell_w18  %>% 
+  filter(cluster == 6)
+cluster_6 
+
+# Extract top genes for cluster 7
+cluster_7_genes <- top20_sct_Tcell_w18  %>% 
+  filter(cluster == 7) %>% 
+  pull(gene)
+# Print genes for cluster 7
+cat("Top 20 genes for Cluster 7:\n")
+print(cluster_7_genes)
+cluster_7 <- top20_sct_Tcell_w18  %>% 
+  filter(cluster == 7)
+cluster_7 
+
+# Extract top genes for cluster 7
+cluster_7_genes <- top20_sct_Tcell_w18  %>% 
+  filter(cluster == 7) %>% 
+  pull(gene)
+# Print genes for cluster 7
+cat("Top 20 genes for Cluster 7:\n")
+print(cluster_7_genes)
+cluster_7 <- top20_sct_Tcell_w18  %>% 
+  filter(cluster == 7)
+cluster_7 
+
+# Extract top genes for cluster 9
+cluster_9_genes <- top20_sct_Tcell_w18  %>% 
+  filter(cluster == 9) %>% 
+  pull(gene)
+# Print genes for cluster 9
+cat("Top 20 genes for Cluster 9:\n")
+print(cluster_9_genes)
+cluster_9 <- top20_sct_Tcell_w18  %>% 
+  filter(cluster == 9)
+cluster_9 
+
+# Define the T cell subtypes for each cluster
+TCelltype <- c("CD8 T Cell",  # 0
+                  "CD4 T Cell",  #1 
+                  "CD4 T Cell",  #2 
+                  "CD8 T Cell",  #3 
+                  "CD4 T Cell",  #4 
+                  "NK Cell",  #5 
+                  "CD4 T Cell",  #6 Tregs
+                  "CD8 T Cell",  #7 
+                  "CD4 T Cell",  #8 
+                  "CD4 T Cell",  #9 TBD
+                  "NK Cell"  #10 
+)  
+
+# Ensure the Idents are in numeric format
+ident_integers <- as.integer(Idents(Tcells_w18))
+
+# Check if there are any unexpected levels
+unique(ident_integers)
+
+# Add the T cell subtype information to the metadata of the Seurat object
+Tcells_w18$TCellType <- TCelltype[as.integer(Idents(Tcells_w18))]
+
+DimPlot(Tcells_w18,reduction = 'umap',group.by = "TCellType" ,label = T)
+
+
+# Define the T cell subtypes for each cluster
+TCellDetailedtype <- c("CD8 memory",  # 0
+               "Tcon memory",  #1 
+               "Tcon memory",  #2 
+               "CD8 exhausted effector-like",  #3 
+               "Th21-like",  #4 
+               "NK Cell",  #5 
+               "Tregs",  #6 Tregs
+               "CD8 memory",  #7 
+               "Tcon activated",  #8 
+               "Tcon Interferon Sensing",  #9 TBD
+               "NK Cell"  #10 
+)  
+
+# Ensure the Idents are in numeric format
+ident_integers <- as.integer(Idents(Tcells_w18))
+
+# Check if there are any unexpected levels
+unique(ident_integers)
+
+# Add the T cell subtype information to the metadata of the Seurat object
+Tcells_w18$TCellSubType <- TCellDetailedtype[as.integer(Idents(Tcells_w18))]
+
+DimPlot(Tcells_w18,reduction = 'umap',group.by = "TCellSubType" ,label = T)
+Tcells_w18$Idents<-Idents(Tcells_w18)
+Idents(Tcells_w18)<-Tcells_w18$TCellType
+DimPlot(Tcells_w18,reduction = 'umap',label = T)
+saveRDS(Tcells_w18, file = "./annotated_Tcells_w18_int_T1D_Week18_v1.rds")
+
+
+# ----Macrophage subclustering---------------------------------------------------------------------------------------------------------------------------------------
+
+int.T1D_Week18 = FindSubCluster(
+  object = int.T1D_Week18,
+  cluster = "Macrophage",
+  graph.name = "SCT_nn",
+  resolution = 0.5,
+  subcluster.name = "Macrophage Subtypes",
+  algorithm = 2
+)
+
+unique(int.T1D_Week18$`Macrophage Subtypes`)
+
+#Idents(T1D_Timepoints) = T1D_Timepoints$`T Cell Subtypes`
+
+#DimPlot(T1D_Timepoints, reduction = "umap", group.by = , combine = F, label = T)
+
+
+
+Mac_w18 = subset(x = int.T1D_Week18, idents = "Macrophage")
+ElbowPlot(Mac_w18, ndims = 50)
+
+Mac_w18 <- FindNeighbors(Mac_w18, dims = 1:30, verbose = F,reduction = "integrated.dr")
+Mac_w18 <- FindClusters(Mac_w18,graph.name = "SCT_nn", res = 0.3)#graph.name = "SCT_nn"
+Mac_w18 <- RunUMAP(Mac_w18, dims = 1:30,reduction = "integrated.dr")
+
+DimPlot(Mac_w18, reduction = "umap", combine = F, label = T)
+DimPlot(Mac_w18, reduction = "umap", combine = F, label = T,group.by = ("sample"))
+
+get_conserved <- function(cluster){
+  Seurat::FindConservedMarkers(Mac_w18,
+                               ident.1 = cluster,
+                               grouping.var = "sample",
+                               only.pos = TRUE) %>%
+    rownames_to_column(var = "gene")  %>%
+    #left_join(y = unique(annotations[, c("gene_name", "description")]),
+    #          by = c("gene" = "gene_name")) %>%
+    cbind(cluster_id = cluster, .)
+}
+unique(Idents(Mac_w18))
+DefaultAssay(Mac_w18) = "RNA"
+conserved_markers.Mac_w18 <- map_dfr(0:4, get_conserved)
+conserved_markers.Mac_w18[is.na(conserved_markers.Mac_w18)] <- 0
+head(conserved_markers.Mac_w18)
+
+
+
+# Extract top 10 markers per cluster
+top20_Mac_w18 <- conserved_markers.Mac_w18 %>% 
+  mutate(avg_fc = (`Week18_1_avg_log2FC` + 
+                     `Week18_2_avg_log2FC` + 
+                     `Week18_3_avg_log2FC` +
+                     `Week18_4_avg_log2FC` +
+                     `Week18_5_avg_log2FC` +
+                     `Week18_6_avg_log2FC`) /10) %>% 
+  group_by(cluster_id) %>% 
+  top_n(n = 20, 
+        wt = avg_fc)
+
+DefaultAssay(Mac_w18) = "SCT"
+Mac_w18 <- PrepSCTFindMarkers(Mac_w18)
+all.markers <- FindAllMarkers(Mac_w18 , only.pos = TRUE,recorrect_umi = FALSE)
+
+top20_sct_Mac_w18=all.markers %>% 
+  group_by(cluster) %>% 
+  top_n(n = 20, 
+        wt = avg_log2FC)
+
+# Save the top 20 markers grouped by cluster as a CSV file
+write.csv(top20_sct_Mac_w18, file = "top20_sct_Mac_Week18.csv", row.names = FALSE)
+
+
+# Extract top genes for cluster 0
+cluster_0_genes <- top20_sct_Mac_w18  %>% 
+  filter(cluster == 0) %>% 
+  pull(gene)
+# Print genes for cluster 0
+cat("Top 20 genes for Cluster 0:\n")
+print(cluster_0_genes)
+cluster_0 <- top20_sct_Mac_w18  %>% 
+  filter(cluster == 0)
+cluster_0
+
+# Extract top genes for cluster 1
+cluster_1_genes <- top20_sct_Mac_w18  %>% 
+  filter(cluster == 1) %>% 
+  pull(gene)
+# Print genes for cluster 1
+cat("Top 20 genes for Cluster 1:\n")
+print(cluster_1_genes)
+cluster_1 <- top20_sct_Mac_w18  %>% 
+  filter(cluster == 1)
+
+# Extract top genes for cluster 2
+cluster_2_genes <- top20_sct_Mac_w18  %>% 
+  filter(cluster == 2) %>% 
+  pull(gene)
+# Print genes for cluster 2
+cat("Top 20 genes for Cluster 2:\n")
+print(cluster_2_genes)
+cluster_2 <- top20_sct_Mac_w18  %>% 
+  filter(cluster == 2)
+cluster_2 
+
+# Extract top genes for cluster 3
+cluster_3_genes <- top20_sct_Mac_w18  %>% 
+  filter(cluster == 3) %>% 
+  pull(gene)
+# Print genes for cluster 3
+cat("Top 20 genes for Cluster 3:\n")
+print(cluster_3_genes)
+cluster_3 <- top20_sct_Mac_w18  %>% 
+  filter(cluster == 3)
+cluster_3
+
+
+# Extract top genes for cluster 4
+cluster_4_genes <- top20_sct_Mac_w18  %>% 
+  filter(cluster == 4) %>% 
+  pull(gene)
+# Print genes for cluster 4
+cat("Top 20 genes for Cluster 4:\n")
+print(cluster_4_genes)
+cluster_4 <- top20_sct_Mac_w18  %>% 
+  filter(cluster == 4)
+cluster_4
+
+
+DotPlot(Mac_w18,assay = "SCT",group.by = "MacType", features = c(  "Jun","Atf3","Fos","Ccl3","Egr1","Junb", #NF-KB 
+                                             "Apoe","Trem2",#Not Activated
+                                             "Cxcl9","Stat1","Ccl5","Tapbp","Tap1","Cd40","Il12b","Tap2","Psmb8",#IFN-Y and NF-KB activated
+                                             "Prdx1","Il1rn","Lgals1","Lgals3","Cd36","Anxa1","Anxa4","Anxa5","Anxa2","Cxcl14",#Anti-Inflammatory, cell death
+                                             "Birc5","Stmn1","Cdca3","Mki67","Ccna2","Cdk1","Cdca8"#Cell-cycle
+                                                
+                                                
+                                                
+)) + 
+  RotatedAxis() + scale_colour_gradient2(low = "blue", mid = "grey", high = "red")
+
+# Check average expression of Nkg7 per cluster
+AverageExpression(Mac_w18, features = "Cd8b1", group.by = "seurat_clusters")
+
+
+# Define the T cell subtypes for each cluster
+Mactype <- c("Mac-1",  # 0
+               "Mac-2",  #1 -NFKB Activated
+               "Mac-3",  #2 
+               "Mac-4",  #3 
+               "Mac-2"  #4 
+)  
+
+# Ensure the Idents are in numeric format
+ident_integers <- as.integer(Idents(Mac_w18))
+
+# Check if there are any unexpected levels
+unique(ident_integers)
+
+# Add the T cell subtype information to the metadata of the Seurat object
+Mac_w18$MacType <- Mactype[as.integer(Idents(Mac_w18))]
+
+DimPlot(Mac_w18,reduction = 'umap',group.by = "MacType" ,label = T)
+
+DefaultAssay(Mac_w18) = "SCT"
+Mac_w18 <- PrepSCTFindMarkers(Mac_w18)
+all.markers <- FindAllMarkers(Mac_w18 , only.pos = TRUE,recorrect_umi = FALSE,group.by = "MacType")
+
+top20_sct_Mac_w18=all.markers %>% 
+  group_by(cluster) %>% 
+  top_n(n = 20, 
+        wt = avg_log2FC)
+
+# Save the top 20 markers grouped by cluster as a CSV file
+write.csv(top20_sct_Mac_w18, file = "top20_sct_Mac_Week18_anno.csv", row.names = FALSE)
+
+
+# Extract top genes for cluster Mac-1
+cluster_Mac1_genes <- top20_sct_Mac_w18  %>% 
+  filter(cluster == 'Mac-1') %>% 
+  pull(gene)
+# Print genes for cluster Mac-1
+cat("Top 20 genes for Cluster Mac-1:\n")
+print(cluster_Mac1_genes)
+cluster_Mac1 <- top20_sct_Mac_w18  %>% 
+  filter(cluster == 'Mac-1')
+cluster_0
+
+# Extract top genes for cluster Mac-2
+cluster_Mac2_genes <- top20_sct_Mac_w18  %>% 
+  filter(cluster == "Mac-2") %>% 
+  pull(gene)
+# Print genes for cluster Mac-2
+cat("Top 20 genes for Cluster Mac-2:\n")
+print(cluster_Mac2_genes)
+cluster_Mac2 <- top20_sct_Mac_w18  %>% 
+  filter(cluster == "Mac-2")
+
+# Extract top genes for cluster Mac-3
+cluster_Mac3_genes <- top20_sct_Mac_w18  %>% 
+  filter(cluster == "Mac-3") %>% 
+  pull(gene)
+# Print genes for cluster Mac-3
+cat("Top 20 genes for Cluster Mac-3:\n")
+print(cluster_Mac3_genes)
+cluster_Mac3 <- top20_sct_Mac_w18  %>% 
+  filter(cluster == "Mac-3")
+cluster_Mac3 
+
+# Extract top genes for cluster Mac-4
+cluster_Mac4_genes <- top20_sct_Mac_w18  %>% 
+  filter(cluster == Mac4) %>% 
+  pull(gene)
+# Print genes for cluster 3
+cat("Top 20 genes for Cluster Mac-4:\n")
+print(cluster_Mac4_genes)
+cluster_Mac4 <- top20_sct_Mac_w18  %>% 
+  filter(cluster == "Mac-4")
+cluster_Mac4
+
+
+# Extract top genes for cluster 4
+cluster_4_genes <- top20_sct_Mac_w18  %>% 
+  filter(cluster == 4) %>% 
+  pull(gene)
+# Print genes for cluster 4
+cat("Top 20 genes for Cluster 4:\n")
+print(cluster_4_genes)
+cluster_4 <- top20_sct_Mac_w18  %>% 
+  filter(cluster == 4)
+cluster_4
+
+
+
+Mac_w18$Idents<-Idents(Mac_w18)
+
+Idents(Mac_w18)<-Mac_w18$MacType
+DimPlot(Mac_w18,reduction = 'umap',label = T)
+saveRDS(Mac_w18, file = "./annotated_Mac_w18_int_T1D_Week18_v1.rds")

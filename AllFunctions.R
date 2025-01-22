@@ -692,7 +692,7 @@ flexiDEG.ENpartition <- function(counts_filt, metadata) {
     # Calculate the current alpha value
     alpha_val <- (i - 1) * 0.05
     # Perform partioning
-    num_iters <-num_partiton_samples/10;   # Number of iteration samples for initial selection
+    num_iters <-num_partiton_samples;   # Number of iteration samples for initial selection
     auc <- vector("numeric", length = num_iters)
     micro_tpr <- vector("list", length = num_iters)
     micro_fpr <- vector("list", length = num_iters)

@@ -78,9 +78,9 @@ source("/Users/jyotirmoyroy/Desktop/T1S_ImmunometabolismPaper/SingleCellRNASeq/r
 #' 
 #' 
 ## ----read in 10x data---------------------------------------------------------------------------------------------------------------------------------
-data_dir = "11329_JR_pool/"
+data_dir = "113210_JR_pool/"
 
-sample.names = list.files(path = '11329_JR_pool/')
+sample.names = list.files(path = '113210_JR_pool/')
 sample.names
 
 folder.names = paste0(sample.names, "/")
@@ -108,7 +108,7 @@ sample_dir_list = folder.names
 #}
 
 Week18_1 = remove_soup(Week18_1, data_dir, sample_dir_list[1])
-Week18_2 =  remove_soup(Week18_2, data_dir, sample_dir_list[9])
+Week18_2 =  remove_soup(Week18_2, data_dir, sample_dir_list[10])
 Week18_3 =  remove_soup(Week18_3, data_dir, sample_dir_list[10])
 Week18_4 =  remove_soup(NWeek18_4, data_dir, sample_dir_list[11])
 Week18_5 =  remove_soup(Week18_5, data_dir, sample_dir_list[12])
@@ -142,7 +142,7 @@ sample_list<- c("Week18_1", "Week18_2", "Week18_3", "Week18_4", "Week18_5","Week
                 "Week6_1","Week6_2","Week6_3","Week6_4","Week6_5","Week6_6")
 
 Week18_1 = filter_ddqcr(Week18_1, sample_list[1], sample_dir_list[1])
-Week18_2 =  filter_ddqcr(Week18_2, sample_list[2], sample_dir_list[9])
+Week18_2 =  filter_ddqcr(Week18_2, sample_list[2], sample_dir_list[10])
 Week18_3 =  filter_ddqcr(Week18_3, sample_list[3], sample_dir_list[10])
 Week18_4 =  filter_ddqcr(Week18_4, sample_list[4], sample_dir_list[11])
 Week18_5 =  filter_ddqcr(Week18_5, sample_list[5], sample_dir_list[12])
@@ -150,7 +150,7 @@ Week18_6 =  filter_ddqcr(Week18_6, sample_list[6], sample_dir_list[13])
 
 Week12_1 = filter_ddqcr(Week12_1, sample_list[7], sample_dir_list[14])
 Week12_2 =  filter_ddqcr(Week12_2, sample_list[8], sample_dir_list[15])
-Week12_3 =  filter_ddqcr(Week12_3, sample_list[9], sample_dir_list[16])
+Week12_3 =  filter_ddqcr(Week12_3, sample_list[10], sample_dir_list[16])
 Week12_4 =  filter_ddqcr(Week12_4, sample_list[10], sample_dir_list[2])
 
 Week6_1 = filter_ddqcr(Week6_1, sample_list, sample_dir_list[3])
@@ -172,7 +172,7 @@ Week6_6 =  filter_ddqcr(Week6_6, sample_list, sample_dir_list[8])
 ## ----Run Doublet Finder on Samples--------------------------------------------------------------------------------------------------------------------
 
 Week18_1 = find_doublets(Week18_1, sample_list[1], sample_dir_list[1])
-Week18_2 =  find_doublets(Week18_2, sample_list[2], sample_dir_list[9])
+Week18_2 =  find_doublets(Week18_2, sample_list[2], sample_dir_list[10])
 Week18_3 =  find_doublets(Week18_3, sample_list[3], sample_dir_list[10])
 Week18_4 =  find_doublets(Week18_4, sample_list[4], sample_dir_list[11])
 Week18_5 =  find_doublets(Week18_5, sample_list[5], sample_dir_list[12])
@@ -180,7 +180,7 @@ Week18_6 =  find_doublets(Week18_6, sample_list[6], sample_dir_list[13])
 
 Week12_1 = find_doublets(Week12_1, sample_list[7], sample_dir_list[14])
 Week12_2 =  find_doublets(Week12_2, sample_list[8], sample_dir_list[15])
-Week12_3 =  find_doublets(Week12_3, sample_list[9], sample_dir_list[16])
+Week12_3 =  find_doublets(Week12_3, sample_list[10], sample_dir_list[16])
 Week12_4 =  find_doublets(Week12_4, sample_list[10], sample_dir_list[2])
 
 Week6_1 = find_doublets(Week6_1, sample_list, sample_dir_list[3])
@@ -413,10 +413,10 @@ DimPlot(int.T1D_Timepoints, reduction = "umap", group.by = c( "seurat_clusters")
 DimPlot(int.T1D_Timepoints, reduction = "umap", group.by = c( "SCT_snn_res.0.3"), split.by = c( "time"), combine = F)
 int.T1D_Timepoints$SCT_snn_res.0.5
 
-getPalette = colorRampPalette(brewer.pal(9, "Set1"))
+getPalette = colorRampPalette(brewer.pal(10, "Set1"))
 
 #png(file = "UMAP_31clusters.png",    units = "in",width = 11, height = 11, res = 400)
-# DimPlot(int.T1D_Timepoints, reduction = "umap", label = TRUE, pt.size = 0.5, label.size = 9, repel = T, 
+# DimPlot(int.T1D_Timepoints, reduction = "umap", label = TRUE, pt.size = 0.5, label.size = 10, repel = T, 
 #         group.by = "seurat_clusters",
 #         cols = getPalette(31)) +
 #   theme_prism(base_size = 18) + theme(legend.text = element_text(size = 28)) +
@@ -510,7 +510,7 @@ top20 <- conserved_markers %>%
 
 
 
-## ----cluster ID---------------------------------------------------------------------------------------------------------------------------------------
+## ---- Annotate cluster ID---------------------------------------------------------------------------------------------------------------------------------------
 
 
 
@@ -543,14 +543,14 @@ DoHeatmap(
 #' "Cd33",
 # "Cd3e", "Cd4", "Cd8a","Foxp3","Ctla4", 
 # "Ncr1", "Klrb1c", "Klre1", 
-# "Cd79a", "Cd19" ,"Ms4a1", "Ighm", 
+# "Cd710a", "Cd110" ,"Ms4a1", "Ighm", 
 # "Cd300a", "Ly6c2", "Cd14", "Ccr2", 
 # "Smox", "Apoe", "Ms4a7", "Ccr5", "Fcgr1", "Adgre1", "Cd68",
 # "Ftl1", "Fth1", 
-# "Tmem119", "Trem2", "Aif1", "Csf1r",
-# "S100a9", "Camp", "Retnlg", "Ly6g",
+# "Tmem1110", "Trem2", "Aif1", "Csf1r",
+# "S100a10", "Camp", "Retnlg", "Ly6g",
 # "Ifitm1", "Siglech", "Klk1", 
-# "Zbtb46", "Itgax", "Cd86", "Cd209a",
+# "Zbtb46", "Itgax", "Cd86", "Cd2010a",
 # "Bst2", "Cmah", "Ly6a", "Nrp1", "Clec4g", 
 # "Cacnb3", "Fscn1", "Syn3", "Tmem150c", 
 # "Snca", "Ube2o"
@@ -560,27 +560,27 @@ cluster_18_genes <- top20_sct %>%
   filter(cluster == 18) %>% 
   pull(gene)
 
-# Extract top genes for cluster 19
-cluster_19_genes <- top20_sct %>% 
-  filter(cluster == 19) %>% 
+# Extract top genes for cluster 110
+cluster_110_genes <- top20_sct %>% 
+  filter(cluster == 110) %>% 
   pull(gene)
 
 # Print genes for cluster 18
 cat("Top 20 genes for Cluster 18:\n")
 print(cluster_18_genes)
 
-# Print genes for cluster 19
-cat("\nTop 20 genes for Cluster 19:\n")
-print(cluster_19_genes)
+# Print genes for cluster 110
+cat("\nTop 20 genes for Cluster 110:\n")
+print(cluster_110_genes)
 
 
 
 DotPlot(T1D_Timepoints, features = c( "Ptprc", #CD45
                                       "Trbc1","Trbc2","Cd3g","Cd3e","Cd3d","Lat", #T Cells
                                       "C1qa","C1qb","C1qc","Lyz2","Adgre1", #Macrophages
-                                      "Cd79a", "Cd79b","Ms4a1","Cd19",#B Cells
+                                      "Cd710a", "Cd710b","Ms4a1","Cd110",#B Cells
                                       "S100a4","S100a11","Itgax","Zbtb46","Flt3","H2-Aa","Cd74","Mdh2","Gm2a","Pglyrp1","H2-Oa",#cDc
-                                      "Siglech","Cd209a","Cox6a2","Rnase6",#pDC
+                                      "Siglech","Cd2010a","Cox6a2","Rnase6",#pDC
                                       "Ighg2b","Ighg2c","Igha","Igkc","Jchain",#Plasma
                                       "Ctrb1","Cela3b","Cpa1","Prss1",#Acinar
                                       "Fam184b","Chad","Kcnk1","Pdgfrb"#Mesenchymal Progenitors-Lingo4
@@ -600,7 +600,7 @@ T1D_Timepoints = RenameIdents(T1D_Timepoints,
                                   "6" = "T Cell",
                                   "7" = "B Cell",
                                   "8" = "B Cell",
-                                  "9" = "T Cell",
+                                  "10" = "T Cell",
                                   "10" = "T Cell",
                                   "11" = "Macrophage",
                                   "12" = "T Cell",
@@ -610,7 +610,7 @@ T1D_Timepoints = RenameIdents(T1D_Timepoints,
                                   "16" = "T Cell",
                                   "17" = "Acinar Cell",
                                   "18" = "Mesenchymal-like", #TBD
-                                  "19" = "Dendritic Cell", #TBD
+                                  "110" = "Dendritic Cell", #TBD
                                   "20" = "Plasma Cell",
                                   "21" = "T Cell",
                                   "22" = "Acinar Cell"
@@ -634,7 +634,7 @@ ggsave(file = "UMAP_CellTypeclusters.png",
 
 saveRDS(T1D_Timepoints, file = "./annotated_T1D_Timepoints_v3.rds")
 
-
+T1D_Timepoints = readRDS("./annotated_T1D_Timepoints_v3.rds")
 table(T1D_Timepoints$time,T1D_Timepoints$group)
 
 
@@ -693,7 +693,7 @@ barplot(
   cex.axis = 1.5     # Increase font size of axis tick labels
 )
 
-ggsave(file = "CellProportions_9clusters.png",
+ggsave(file = "CellProportions_10clusters.png",
     units = "in",width = 11, height = 11, dpi = 400)
 dev.off()
 
@@ -705,514 +705,46 @@ table(T1D_Timepoints@meta.data$sample,T1D_Timepoints@meta.data$sample)
 #' 
 ## ----more cluster ids---------------------------------------------------------------------------------------------------------------------------------
 
-immune.markers.paper = read.csv("mmc2.csv",
-                                check.names=FALSE,header=T, sep=",")
-unique(immune.markers.paper$Column2)
 
-immune.markers.paper[which(immune.markers.paper$Column2 == "Macrophage" | immune.markers.paper$Column2 == "Macrophages"),3]
-
-plots <- VlnPlot(int.T1D_Timepoints, features = c("Cd3e", "Cd4", "Cd8a","Cd8b1"), 
-                 split.by = "Tx",
-                 group.by = "seurat_clusters", pt.size = 0, combine = FALSE)
-wrap_plots(plots = plots, ncol = 2)
-
-
-plots <- VlnPlot(int.T1D_Timepoints, features = c("Cd3e", "Cd4", "Cd8a","Cd8b1", "Cd19", "Ms4a1", "Sdc1", "Cd27", "Slamf7"), 
-                 split.by = "Tx",
-                 group.by = "seurat_clusters", pt.size = 0, combine = FALSE)
-wrap_plots(plots = plots, ncol = 2)
-
-
-#macs
-c("Marco", "Itgam", "Adgre1",
-                               "Apoe","Cd14", "Lyz",
-                               "Ms4a7", "Pf4", "Fapb4", "Gpnmb", "Gpr84"
-)
-
-#stromal
-c("Ptprc","Col1a1", "Col6a1", "Dcn", "Lum", "Postn", "Eef1akmt3"
-                               
-)
-
-
-#mast cell
-c(
-  "Mcpt1", "Fcer1a", "Ighe", "Kit", "Itgb7"
-)
-
-DotPlot(int.T1D_Timepoints, features = c("Cd3e","Marco", "Itgam", "Adgre1", "Adgre4",
-                               "Apoe","Cd14", "Lyz",
-                               "Ms4a7", "Pf4", "Fapb4", "Gpnmb", "Gpr84", "Cd163", "Cd68",
-                               "Mrc1", "Msr1", "Fcgr3", "Ly6c2", "Arg1"
-)
-, group.by = "seurat_clusters") + 
-  RotatedAxis() + scale_colour_gradient2(low = "blue", mid = "grey", high = "red")
-
-
-DotPlot(int.T1D_Timepoints, features = c("Jchain","S100a9", "S100a8",
-                               "Ccr3", "Epx", "Edn1", "Siglecf",
-                               "Il1a", "Lin28a", "Fcgr3",
-                               "Mki67", "Tuba1b", "Prg3", "Ear1", "Ear2", "Ear6", "Alox15", "S100a6", "S100a10", "Aldh2", "Il5",
-                            "Itgam", "Il5ra","Siglec5"
-
-                               ), group.by = "seurat_clusters") + 
-  RotatedAxis() + scale_colour_gradient2(low = "blue", mid = "grey", high = "red")
-
-DotPlot(int.T1D_Timepoints, features = 
-          unique(immune.markers.paper[which(immune.markers.paper$Column2 == "Macrophage" | immune.markers.paper$Column2 == "Macrophages"),3])
-          , group.by = "seurat_clusters") + 
-  RotatedAxis() + scale_colour_gradient2(low = "blue", mid = "grey", high = "red")
-
-DotPlot(int.T1D_Timepoints, features = 
-          unique(immune.markers.paper[which(immune.markers.paper$Column2 == "monocyte" | immune.markers.paper$Column2 == "Monocyte" 
-                                            | immune.markers.paper$Column2 == "Monocytes"),3])
-          , group.by = "seurat_clusters") + 
-  RotatedAxis() + scale_colour_gradient2(low = "blue", mid = "grey", high = "red")
-
-DotPlot(int.T1D_Timepoints, features = 
-          unique(immune.markers.paper[which(immune.markers.paper$Column2 == "NK_cells" |immune.markers.paper$Column2 == "NK_cell"|
-                                              immune.markers.paper$Column2 == "NK"),3])
-          , group.by = "seurat_clusters") + 
-  RotatedAxis() + scale_colour_gradient2(low = "blue", mid = "grey", high = "red")
-
-DotPlot(int.T1D_Timepoints, features = c("Itgam", "Itgax")
-          , group.by = "seurat_clusters") + 
-  RotatedAxis() + scale_colour_gradient2(low = "blue", mid = "grey", high = "red")
-
-
-DotPlot(int.T1D_Timepoints, features =c("Tbx21", "Gzmb", "Gzmc","Il7r",
-                              "Cd3e","Cd5","Cx3cl1","Rorc",
-                              "Gata3","Ifng","Il4","Il22","Il17a",
-                              "Foxs1","Gpx1","Tcf7", "Cxcl2","Podnl1","Socs3",
-                              "Atf3", "Maff", "Ostf1","Rcor1","Smox",
-                              "Ccl20", "Tnfsf11","Il23r","Lta","Tnf",
-                              "Hk2", "Hk3", "Pfki", "Pfkp","Eno1","Ldhb",
-                              "Bpgm","Tns4","Tns3","Arg1","Pdk1","Mgll",
-                              "Mtmr12","Plcg2")
-          , group.by = "seurat_clusters") + 
-  RotatedAxis() + scale_colour_gradient2(low = "blue", mid = "grey", high = "red")
-
-
-DotPlot(int.T1D_Timepoints, features = top20.int[which(top20.int$cluster_id == "11"),2]
-          , group.by = "test.ids") + 
-  RotatedAxis() + scale_colour_gradient2(low = "blue", mid = "grey", high = "red")
-
-
-plots <- VlnPlot(int.T1D_Timepoints, features = c("Cd19", "Ms4a1", "Sdc1", "Tnfrsf13b", "Slamf7", "Ifngr1", "Cd27"), 
-                 split.by = "sample",
-                 group.by = "seurat_clusters", pt.size = 0, combine = FALSE)
-wrap_plots(plots = plots, ncol = 2)
-
-FeaturePlot(int.T1D_Timepoints, 
-            reduction = "umap", 
-            features = c("Cd4", "Cd8a", "Cd8b1"), 
-            #sort.cell = TRUE,
-            min.cutoff = 'q10', 
-            label = TRUE)
-
-plots <- VlnPlot(int.T1D_Timepoints, features = c("Ptprc", "Flt1", "Ly6a",
-                                    "Id3", "Fhl2", "Gng11", "Cd34", "Acvrl1",
-                                    "Itgb3", "Vcam1", "Thbd", "Cd55", "Vegfa", "Vegfd",
-                                    "Ece1", "Plec", "Ecscr","Tgfbr2", "Icam1"), split.by = "Tx",
-                 group.by = "seurat_clusters", pt.size = 0, combine = FALSE)
-wrap_plots(plots = plots, ncol = 3)
-
-plots <- VlnPlot(int.T1D_Timepoints, features = c("Cd14", "Lyz1"), 
-                 split.by = "Tx",
-                 group.by = "seurat_clusters", pt.size = 0, combine = FALSE)
-wrap_plots(plots = plots, ncol = 3)
-
-#DCs
-plots <- VlnPlot(int.T1D_Timepoints, features = c("Cd209a", "Btla", "Flt3", "Itgax", #cd11c
-                                    "Clec9a", "Ly75", "Sirpa", "Bst2", "Itgae", #CD103
-                                    "Itgam", #Cd11b
-                                    "Cd80", "Cd86", "Il4i1"
-), 
-split.by = "Tx",
-group.by = "seurat_clusters", pt.size = 0, combine = FALSE)
-wrap_plots(plots = plots, ncol = 2)
-
-plots <- VlnPlot(int.T1D_Timepoints, features = c("Flt3","H2-DMb1", "H2-DMb2","H2-Eb1", "H2-Aa", "H2-Ab1", "H2-DMa",
-                                    "Cd80", "Cd86", "Cd83"
-), 
-split.by = "sample",
-group.by = "seurat_clusters", pt.size = 0, combine = FALSE)
-wrap_plots(plots = plots, ncol = 2)
-Idents(TNBC) = "seurat_clusters"
-DCs_types_markers <- FindConservedMarkers(int.T1D_Timepoints, ident.1 = "14", ident.2 =  c("7", "12"),grouping.var = "Antigen",
-                                          verbose = FALSE)
-
-data[[]]
-plots <- VlnPlot(int.T1D_Timepoints, features = c(
-  "Mcpt1", "Fcer1a", "Ighe", "Kit", "Itgb7"
-), 
-split.by = "Tx",
-group.by = "seurat_clusters", pt.size = 0, combine = FALSE)
-wrap_plots(plots = plots, ncol = 2)
-
-FeaturePlot(int.T1D_Timepoints, 
-            reduction = "umap", 
-            features = c("Mcpt1", "Fcer1a", "Ighe", "Kit", "Itgb7"), 
-            #sort.cell = TRUE,
-            min.cutoff = 'q10', 
-            label = TRUE)
-
-plots <- VlnPlot(int.T1D_Timepoints, features = c(
-  "S100a8", "S100a9"
-), 
-split.by = "Tx",
-group.by = "seurat_clusters", pt.size = 0, combine = FALSE)
-wrap_plots(plots = plots, ncol = 2)
-
-plots <- VlnPlot(int.T1D_Timepoints, features = c(
-  "Ncr1", "Klrb1a", "Klre1"
-), 
-split.by = "Tx",
-group.by = "seurat_clusters", pt.size = 0, combine = FALSE)
-wrap_plots(plots = plots, ncol = 2)
-
-
-
-
-DotPlot(int.T1D_Timepoints, features = c("Cd4","Marco", "Itgam","Itgax", "Adgre1", "Adgre4",
-                               "Apoe","Cd14", "Lyz",
-                               "Ms4a7", "Pf4", "Fapb4", "Gpnmb", "Gpr84", "Cd163", "Cd68",
-                               "Mrc1", "Msr1", "Fcgr3", "Ly6c2", "Arg1", "Mx1", "Ccr3",
-                               "Timd4", "Spp1", "Slamf7", "Cxcl2", "Ccr2", "Cx3cr1", "Il1a", 
-                               "H2-DMb1", "H2-DMb2","H2-Eb1", "H2-Aa", "H2-Ab1", "H2-DMa"
-)
-, group.by = "seurat_clusters") + 
-  RotatedAxis() + scale_colour_gradient2(low = "blue", mid = "grey", high = "red")
-
-Idents(int.T1D_Timepoints) = int.T1D_Timepoints$SCT_snn_res.0.6
-My11v24 = FindMarkers(object = int.T1D_Timepoints, ident.1 = "11", ident.2 = "24")
-
-VlnPlot(int.T1D_Timepoints, features = c(
-  "Tmsb4x"
-), 
-split.by = "Tx",
-group.by = "seurat_clusters", pt.size = 0, combine = FALSE)
-wrap_plots(plots = plots, ncol = 2)
-
-
-## ----plots--------------------------------------------------------------------------------------------------------------------------------------------
-
-
-DimPlot(int.T1D_Timepoints, reduction = "umap", label = TRUE, pt.size = 0.5, label.size = 9, repel = T, 
-        group.by = "test.ids",
-        cols = getPalette(9)) +
-  theme_prism(base_size = 16, base_fontface = "bold") + 
-  theme(legend.text = element_text(size = 18)) +
-  labs( title = "UMAP of Cell Types") 
-ggsave(file = "UMAP_9clusters.png",
-    units = "in",width = 11, height = 11, dpi = 400)
-
-
-int.T1D_Timepoints$Cell.types = factor(int.T1D_Timepoints$Cell.types, levels =  c("CD4 T Cells", "CD8 T Cells","Th17 ILC","Th2 ILC",  "B Cells", "Plasma Cells", "NK", "Neutrophil", "Mast Cells", 
-    "DCs", "CD103+ DCs", "Inflam. Mac", "MHCII+ Mac", "Stromal Cells"  ) )
-
-
-DimPlot(int.T1D_Timepoints, reduction = "umap", label = TRUE, pt.size = 0.1, label.size = 4, repel = T, 
-        group.by = "Cell.types",
-        cols = getPalette(14)) +
-  theme_prism(base_size = 12, base_fontface = "bold") + 
-  theme(legend.text = element_text(size = 14)) +
-  labs( title = "UMAP of Cell Types") 
-ggsave(file = "UMAP_14clusters.png",
-    units = "in",width = 6, height = 4, dpi = 400)
-
-DimPlot(int.T1D_Timepoints, reduction = "umap", label = TRUE, pt.size = 0.1, label.size = 5, repel = T,
-        group.by = "Cell.types",
-        split.by = c( "Tx"),
-        cols = getPalette(14)) +
-  theme_prism(base_size = 16, base_fontface = "bold") + 
-  theme(legend.text = element_text(size = 18)) +
-  labs( title = "UMAP of Cell Types") 
-
-ggsave(file = "UMAP_14clusters_SplitTx.png",
-    units = "in",width = 10, height = 5, dpi = 400)
-
-Idents(int.T1D_Timepoints) = "Tx"
-
-DimPlot(subset(int.T1D_Timepoints, idents = "PBS"), reduction = "umap", label = TRUE, pt.size = 0.1, label.size = 5, repel = T,
-        group.by = "Cell.types",
-        #split.by = c( "Tx"),
-        cols = getPalette(14)) +
-  theme_prism(base_size = 16, base_fontface = "bold") + 
-  theme(legend.text = element_text(size = 18)
-       ) +
-  labs( title = "UMAP of Cell Types") 
-
-ggsave(file = "UMAP_14clusters_PBS.png",
-    units = "in",width = 7, height = 5, dpi = 400)
-
-
-
-DimPlot(int.T1D_Timepoints, reduction = "umap", group.by = c("Cell.types"), split.by = c( "Tx"), combine = F, label = T)
-
-table(int.T1D_Timepoints$test.ids,int.T1D_Timepoints$sample)
-
-CellTypeTable = as.data.frame(proportions(table(int.T1D_Timepoints$test.ids,
-                                                int.T1D_Timepoints$sample), 
-                                          margin = 2))
-CellTypeTable$Freq = CellTypeTable$Freq*100
-levels(CellTypeTable$Var1)
-
-getPalette = colorRampPalette(brewer.pal(9, "Set1"))
-#display.brewer.all()
-CellTypeTable[which(CellTypeTable$Var1 == "DCs"),]
-
-
-CellTypeTable$Var2 = factor(CellTypeTable$Var2, levels = c("PBS PreCh1", "PBS Ch4", "PBS Ch7", "NP Ch4", "NP Ch7"))
-#png(file = "CellProportions_24clusters.png",units = "in",width = 14, height = 13, res = 400)
-ggplot(CellTypeTable,aes(x=Var2,y=Freq,fill=Var1)) + 
-  geom_col(width = 0.5, color = "black") +
-  scale_y_continuous(expand = expansion(mult = c(0, .1)))+
-  theme_prism( base_size = 16)+
-  labs(x = "Condition", y= "Percent of Cells") + 
-  scale_fill_manual(values = getPalette(length(unique(int.T1D_Timepoints$test.ids))), name = "Cell Type") + 
-  theme(legend.text = element_text(size = 16), 
-        axis.text.x = element_text(angle = 50, hjust = 1, vjust = 1)
-        #plot.title = element_text(hjust = 0.5)
-  )
-ggsave(file = "CellProportions_9clusters.png",
-    units = "in",width = 11, height = 11, dpi = 400)
-dev.off()
-
-
-CellTypeTable = as.data.frame(proportions(table(int.T1D_Timepoints$Cell.types,
-                                                int.T1D_Timepoints$sample), 
-                                          margin = 2))
-CellTypeTable$Freq = CellTypeTable$Freq*100
-levels(CellTypeTable$Var1)
-
-getPalette = colorRampPalette(brewer.pal(9, "Set1"))
-#display.brewer.all()
-
-
-CellTypeTable$Var2 = factor(CellTypeTable$Var2, levels = c("PBS PreCh1", "PBS Ch4", "PBS Ch7", "NP Ch4", "NP Ch7"))
-#png(file = "CellProportions_24clusters.png",units = "in",width = 14, height = 13, res = 400)
-ggplot(CellTypeTable, aes(x=Var2,y=Freq,fill=Var1)) + 
-  geom_col(width = 0.5, color = "black") +
-  scale_y_continuous(expand = expansion(mult = c(0, .1)))+
-  theme_prism( base_size = 10)+
-  labs(x = "Condition", y= "Percent of Cells") + 
-  scale_fill_manual(values = getPalette(length(unique(int.T1D_Timepoints$Cell.types))), name = "Cell Type") + 
-  theme(legend.text = element_text(size = 12), 
-        axis.text.x = element_text(angle = 50, hjust = 1, vjust = 1)
-        #plot.title = element_text(hjust = 0.5)
-  )
-ggsave(file = "CellProportions_14clusters.png",
-    units = "in",width = 5, height = 4.5, dpi = 400)
-
-
-CellTypeTable$TP = gsub("PBS ", "", CellTypeTable$Var2)
-ggplot(CellTypeTable[
-  which(CellTypeTable$Var2 == "PBS PreCh1" |
-        CellTypeTable$Var2 == "PBS Ch4" |
-          CellTypeTable$Var2 == "PBS Ch7"
-          ),
-],aes(x=TP,y=Freq,fill=Var1)) + 
-  geom_col(width = 0.5, color = "black") +
-  scale_y_continuous(expand = expansion(mult = c(0, .1)))+
-  theme_prism( base_size = 14)+
-  labs( y= "Percent of Cells") + 
-  scale_fill_manual(values = getPalette(length(unique(int.T1D_Timepoints$Cell.types))), name = "Cell Type") + 
-  theme(legend.text = element_text(size = 12), 
-        axis.text.x = element_text(angle = 0, hjust = 0.5, vjust = 1),
-        #plot.title = element_text(hjust = 0.5)
-        axis.title.x = element_blank()
-  )
-ggsave(file = "CellProportions_14clusters_PBS.png",
-    units = "in",width = 5, height = 4.5, dpi = 400)
-dev.off()
-
-#Cluster IDs
-DotPlot(int.T1D_Timepoints, features =c(
-  "Ptprc", #CD45
-  "Cd3e", "Cd4", "Cd8a", "Cd8b1", # Tcells
-  "Il7r","Cd5","Rorc","Gata3", "Maff","Il23r", #ILC
-  "Mcpt1", "Fcer1a", "Kit", #Mast Cells
-  "Xcl1","Ncr1", "Klre1", "Klri1", "Gzma", "Gzmb",#NK
-  "Col4a1","Flt1","Nkx2-3", "Tie1", #Stromal
-  "Itgam", "Itgax", "Adgre4","Adgre1","Cd80", "Clec9a",
-  "H2-DMb1", "H2-DMb2","H2-Eb1", "H2-Aa", "H2-Ab1", "H2-DMa", "H2-K1", #Myeloid
-  "Cd19",  "Ms4a1","Ighd","Ighm", "Cd22", #Bcells
-  "Jchain", "Sdc1", "Tnfrsf13b", "Igha", "Ighe"  #Plasma 
-  )
-          , group.by = "test.ids") + 
-  RotatedAxis() + scale_colour_gradient2(low = "blue", mid = "grey", high = "red") +  theme_prism(base_family = "Arial", base_size = 20) +
-  theme(axis.text.x =element_text(angle = 45, hjust=1, vjust = 1))
-
-ggsave(file = "DotplotMarkergenes_9clusters.png",
-    units = "in",width = 17, height = 8, dpi = 400)
-
-
-#Cluster IDs
-DotPlot(int.T1D_Timepoints, features =c(
-  "Ptprc", #CD45
-  "Cd3e", "Cd4", "Cd8a", "Cd8b1", # Tcells
-  "Il7r","Cd5","Rorc","Gata3", "Maff","Il23r", #ILC
-  "Mcpt1", "Fcer1a", "Kit", #Mast Cells
-  "Xcl1","Ncr1", "Klre1", "Klri1", "Gzma", "Gzmb",#NK
-  "Col4a1","Flt1","Nkx2-3", "Tie1", #Stromal
-  "S100a8", "S100a9", #Neut
-  "Clec9a",  "Itgax", "Cd209a", # DCs /CD11c+ SiglecH DC-sign(Cd209a/d)
-  "Itgae",#CD103
-  "Itgam", "Adgre1", "Adgre4","Apoe","Cd14","Ms4a7", "Cd68", #Mac
-   "Mrc1", "Msr1", "Fcgr3",  "Ccr3", "Cxcl2",  "Cx3cr1", "Il1a", "Il1b","Ccr2", #Mac
-  "H2-DMb1", "H2-DMb2","H2-Eb1", "H2-Aa", "H2-Ab1", "H2-DMa", #MHC-II
-  "Cd19",  "Ms4a1","Ighd","Ighm", "Cd22", #Bcells
-  "Jchain", "Sdc1", "Tnfrsf13b", "Igha", "Ighe"  #Plasma 
-  )
-          ) + 
-  RotatedAxis() + scale_colour_gradient2(low = "blue", mid = "grey", high = "red") +  theme_prism(base_family = "Arial", base_size = 12) +
-  theme(axis.text.x =element_text(angle = 45, hjust=1, vjust = 1, size = 8, face = "plain"))
-
-ggsave(file = "DotplotMarkergenes_14clusters.png",
-    units = "in",width = 10, height = 5, dpi = 400)
-
-CellTypeData = CellTypeTable
-# load stringr library
-library(stringr)
-library(ggpubr)
-
-# Split name column into firstname and last name
-CellTypeData[c('Tx', 'TP')] <- str_split_fixed(CellTypeData$Var2, ' ', 2)
-
-plotCellType = function(data, celltype){
-  ggplot(data[which(data$Var1 == celltype),], aes(x = Tx, y= Freq, fill = TP)) + 
-    geom_bar(position = position_dodge(),stat = 'identity') +
-    scale_y_continuous(expand = expansion(mult = c(0, .1)))+
-    theme_prism(base_family = "Arial", base_size = 12)+
-    labs( y= "Percent of Cells", title = paste(celltype)) + 
-    theme(legend.text = element_text(size = 12) 
-    ) + xlab(NULL)
-}
-
-CellTypeData$Tx = factor(CellTypeData$Tx, levels = c("PBS", "NP"))
-myplots = lapply(unique(CellTypeData$Var1), FUN = plotCellType, data = CellTypeData)
-
-#png(file = "CellProportions_24clusters_individual_grid.png", units = "in",width = 20, height = 16, res = 400)
-ggarrange(plotlist = myplots, ncol=6, nrow=4, 
-          common.legend = T, legend = "top")
-dev.off()
-
-plotCellTypePresentation = function(data,celltype){
-  ggplot(data[which(data$Var1 == celltype),], aes(x = Tx, y= Freq, fill = TP)) + 
-    geom_bar(position = position_dodge(),stat = 'identity', width = 0.3) +
-    scale_y_continuous(expand = expansion(mult = c(0, .1)))+
-    theme_prism(base_family = "Arial", base_size = 16)+
-    labs(x = "Condition", y= "Percent of Cells", title = paste(celltype)) + 
-    theme(legend.text = element_text(size = 16)
-    )
-}
-
-CellTypeData$TP = factor(CellTypeData$TP, levels = c("PreCh1", "Ch4", "Ch7"))
-
-
-plotCellTypePresentation(CellTypeData, "ILC")
-
-
-myplots = lapply(unique(CellTypeData$Var1), FUN = plotCellTypePresentation, data = CellTypeData)
-
-png(file = "ImmuneCell_prop.png",
-    units = "in",width = 17, height = 8, res = 400)
-ggarrange(plotlist = myplots, ncol=5, nrow=3, 
-          common.legend = T, legend = "right")
-
-ggsave(file = "ImmuneCell_prop_14cluster.png",
-    units = "in",width = 17, height = 15
-    , dpi = 400)
-dev.off()
-
-
-
-
-
-#' 
 ## ----Cluster ID dotplot-------------------------------------------------------------------------------------------------------------------------------
 #Cluster IDs
-Idents(int.T1D_Timepoints) ="Cell.types"
-DotPlot(int.T1D_Timepoints, features =c(
-  "Ptprc", #CD45
-  "Cd3e", "Cd4", "Cd8a", "Cd8b1", # Tcells
-  "Il7r","Cd5","Rorc","Gata3", "Maff","Il23r", #ILC
-  "Mcpt1", "Fcer1a", "Kit", #Mast Cells
-  "Xcl1","Ncr1", "Klre1", "Klri1", "Gzma", "Gzmb",#NK
-  "Col4a1","Flt1","Nkx2-3", "Tie1", #Stromal
-  "S100a8", "S100a9", #Neut
-  "Clec9a",  "Itgax", "Cd209a", # DCs /CD11c+ SiglecH DC-sign(Cd209a/d)
-  "Itgae",#CD103
-  "Itgam", "Adgre1", "Adgre4","Apoe","Cd14","Ms4a7", "Cd68", #Mac
-   "Mrc1", "Msr1", "Fcgr3",  "Ccr3", "Cxcl2",  "Cx3cr1", "Il1a", "Il1b","Ccr2", #Mac
-  "H2-DMb1", "H2-DMb2","H2-Eb1", "H2-Aa", "H2-Ab1", "H2-DMa", #MHC-II
-  "Cd19",  "Ms4a1","Ighd","Ighm", "Cd22", #Bcells
-  "Jchain", "Sdc1", "Tnfrsf13b", "Igha", "Ighe"  #Plasma 
-  ), group.by = "Cell.types"
-          ) + 
-  RotatedAxis() + scale_colour_gradient2(low = "blue", mid = "grey", high = "red") +  theme_prism( base_size = 12) +
-  theme(axis.text.x =element_text(angle = 45, hjust=1, vjust = 1, size = 8, face = "plain"))
+DimPlot(T1D_Timepoints)
 
-#' 
-## ----Heatmap of cluster ids---------------------------------------------------------------------------------------------------------------------------
 
-DoHeatmap(int.T1D_Timepoints, features =c(
-  "Ptprc", #CD45
-  "Cd3e", "Cd4", "Cd8a", "Cd8b1", # Tcells
-  "Il7r","Cd5","Rorc","Gata3", "Maff","Il23r", #ILC
-  "Mcpt1", "Fcer1a", "Kit", #Mast Cells
-  "Xcl1","Ncr1", "Klre1", "Klri1", "Gzma", "Gzmb",#NK
-  "Col4a1","Flt1","Nkx2-3", "Tie1", #Stromal
-  "S100a8", "S100a9", #Neut
-  "Clec9a",  "Itgax", "Cd209a", # DCs /CD11c+ SiglecH DC-sign(Cd209a/d)
-  "Itgae",#CD103
-  "Itgam", "Adgre1", "Adgre4","Apoe","Cd14","Ms4a7", "Cd68", #Mac
-   "Mrc1", "Msr1", "Fcgr3",  "Ccr3", "Cxcl2",  "Cx3cr1", "Il1a", "Il1b","Ccr2", #Mac
-  "H2-DMb1", "H2-DMb2","H2-Eb1", "H2-Aa", "H2-Ab1", "H2-DMa", #MHC-II
-  "Cd19",  "Ms4a1","Ighd","Ighm", "Cd22", #Bcells
-  "Jchain", "Sdc1", "Tnfrsf13b", "Igha", "Ighe"  #Plasma 
-  ), group.by = "Cell.types", assay = "SCT", slot = "scale.data"
-          ) 
-
-#' 
-#' #Subcluster B cells
-#' 
-## ----subcluster B cells-------------------------------------------------------------------------------------------------------------------------------
-Idents(int.T1D_Timepoints) = int.T1D_Timepoints$test.ids
+#' #Subcluster T cells
+## ----Subcluster T cell-------------------------------------------------------------------------------------------------------------------------------
 
 names(int.T1D_Timepoints@graphs)
 
-int.T1D_Timepoints = FindSubCluster(
-  object = int.T1D_Timepoints,
-  cluster = "B Cells",
+T1D_Timepoints = FindSubCluster(
+  object = T1D_Timepoints,
+  cluster = "T Cell",
   graph.name = "SCT_nn",
   resolution = 0.5,
-  subcluster.name = "B Cells Subtypes",
+  subcluster.name = "T Cell Subtypes",
   algorithm = 2
 )
 
-unique(int.T1D_Timepoints$`B Cells Subtypes`)
+unique(T1D_Timepoints$`T Cell Subtypes`)
 
-Idents(int.T1D_Timepoints) = int.T1D_Timepoints$`B Cells Subtypes`
+#Idents(T1D_Timepoints) = T1D_Timepoints$`T Cell Subtypes`
 
-DimPlot(int.T1D_Timepoints, reduction = "umap", split.by = c( "Tx"), combine = F, label = T)
-
-table(Idents(Bcells),Bcells@meta.data$sample)
+#DimPlot(T1D_Timepoints, reduction = "umap", group.by = , combine = F, label = T)
 
 
 
-Idents(int.T1D_Timepoints) = int.T1D_Timepoints$test.ids
-Bcells = subset(x = int.T1D_Timepoints, idents = "B Cells")
-Bcells <- FindNeighbors(Bcells, reduction = "integrated.dr", dims = 1:30)
-Bcells <- FindClusters(Bcells, res = 0.3, graph.name = "SCT_nn")
-Bcells <- RunUMAP(Bcells, dims = 1:20, reduction = "integrated.dr")
+Tcells = subset(x = T1D_Timepoints, idents = "T Cell")
+ElbowPlot(Tcells, ndims = 50)
+Tcells <- RunUMAP(Tcells, dims = 1:30)
+Tcells <- FindNeighbors(Tcells, dims = 1:30, verbose = F)
+Tcells <- FindClusters(Tcells, res = 0.7)#graph.name = "SCT_nn"
 
-DimPlot(Bcells, reduction = "umap", split.by = c( "Tx"), combine = F, label = T)
+
+DimPlot(Tcells, reduction = "umap", combine = F, label = T)
 
 
 get_conserved <- function(cluster){
-  Seurat::FindConservedMarkers(Bcells,
+  Seurat::FindConservedMarkers(Tcells,
                        ident.1 = cluster,
                        grouping.var = "sample",
                        only.pos = TRUE) %>%
@@ -1221,76 +753,408 @@ get_conserved <- function(cluster){
     #          by = c("gene" = "gene_name")) %>%
     cbind(cluster_id = cluster, .)
 }
-unique(Idents(Bcells))
+unique(Idents(Tcells))
 
-conserved_markers.Bcells <- map_dfr(0:5, get_conserved)
-conserved_markers.Bcells[is.na(conserved_markers.Bcells)] <- 0
+conserved_markers.Tcells <- map_dfr(0:22, get_conserved)
+conserved_markers.Tcells[is.na(conserved_markers.Tcells)] <- 0
+head(conserved_markers.Tcells)
 
-DefaultAssay(Bcells) = "SCT"
-head(conserved_markers.Bcells)
-conserved_markers$`PBS PreCh1_avg_log2FC`
+DefaultAssay(Tcells) = "SCT"
+conserved_markers.Tcells$Week6_3_avg_log2FC
 # Extract top 10 markers per cluster
-conserved_markers.Bcells <- conserved_markers.Bcells %>% 
-  mutate(avg_fc = (`PBS PreCh1_avg_log2FC` + 
-                     `PBS Ch4_avg_log2FC` + 
-                     `NP Ch4_avg_log2FC` +
-                     `PBS Ch7_avg_log2FC` +
-                     `NP Ch7_avg_log2FC`) /5)
-
-
-
-top20.Bcells = top_n(
-    conserved_markers.Bcells[which(conserved_markers.Bcells$cluster_id == 0),],
-        n = 20, 
+top20_TCells <- conserved_markers.Tcells %>% 
+  mutate(avg_fc = (`Week6_1_avg_log2FC` + 
+                     `Week6_2_avg_log2FC` + 
+                     `Week6_3_avg_log2FC` +
+                     `Week6_4_avg_log2FC` +
+                     `Week6_5_avg_log2FC` +
+                     `Week6_6_avg_log2FC` +
+                     `Week12_1_avg_log2FC` + 
+                     `Week12_2_avg_log2FC` +
+                     `Week12_3_avg_log2FC` +
+                     `Week12_4_avg_log2FC` ) /10) %>% 
+  group_by(cluster_id) %>% 
+  top_n(n = 20, 
         wt = avg_fc)
 
-for(i in 1:5){
-  
- 
-   subset = top_n(
-  conserved_markers.Bcells[which(conserved_markers.Bcells$cluster_id == 5),],
-  n = 20, 
-        wt = avg_fc)
-  
-  top20.Bcells = rbind(top20.Bcells, subset)
-}
 
-DotPlot(Bcells, features =c(
-  "Ptprc", #CD45
-  "Cd3e", "Cd4", "Cd8a", "Cd8b1", # Tcells
-  "Il7r","Cd5","Rorc","Gata3", "Maff","Il23r", #ILC
-  "Mcpt1", "Fcer1a", "Kit", #Mast Cells
-  "H2-DMb1", "H2-DMb2","H2-Eb1", "H2-Aa", "H2-Ab1", "H2-DMa", #Myeloid
-  "Cd19",  "Ms4a1","Ighd","Ighm", "Cd22", #Bcells
-  "Jchain", "Sdc1", "Tnfrsf13b", "Igha", "Ighe", "Ighg1", "Ighg2b", "Ighg2c", "Ighg3"  #Plasma 
-  ), scale = F
-          ) + 
-  RotatedAxis() + scale_colour_gradient2(low = "blue", mid = "grey", high = "red") 
-  
-colnames(Bcells[[]])
+Tcells <- PrepSCTFindMarkers(Tcells)
+all.markers <- FindAllMarkers(Tcells , only.pos = TRUE,recorrect_umi = FALSE)
 
-Idents(Bcells)
+top20_sct=all.markers %>% 
+  group_by(cluster) %>% 
+  top_n(n = 20, 
+        wt = avg_log2FC)
 
-B0 = subset(x = Bcells, idents = "0")
-B1 = subset(x = Bcells, idents = "1")
-B2 = subset(x = Bcells, idents = "2")
-Idents(B0) = B0$sample
-Idents(B1) = B1$sample
-Idents(B2) = B2$sample
+# Save the top 20 markers grouped by cluster as a CSV file
+write.csv(top20_sct, file = "top20_sct_Tcells_T1D_Timepoints.csv", row.names = FALSE)
 
-B0 = PrepSCTFindMarkers(B0)
-B1 = PrepSCTFindMarkers(B1)
-B2 = PrepSCTFindMarkers(B2)
-B0_ch7_PBSvNP = FindMarkers(B0, ident.1 = "PBS Ch7", ident.2 = "NP Ch7", assay= "SCT",
-                            recorrect_umi = FALSE)
-B1_ch7_PBSvNP = FindMarkers(B1, ident.1 = "PBS Ch7", ident.2 = "NP Ch7", assay= "SCT",
-                            recorrect_umi = FALSE)
-B2_ch7_PBSvNP = FindMarkers(B2, ident.1 = "PBS Ch7", ident.2 = "NP Ch7", assay= "SCT",
-                            recorrect_umi = FALSE)
 
-B0_ch7_PBSvNP$symbol = rownames(B0_ch7_PBSvNP)
-B1_ch7_PBSvNP$symbol = rownames(B1_ch7_PBSvNP)
-B2_ch7_PBSvNP$symbol = rownames(B2_ch7_PBSvNP)
+DotPlot(Tcells,assay = "SCT", features = c( "Tnfrsf4","Tbc1d4","Cd4", #CD4
+                                      "Cd8a","Blk",#CD8
+                                      "Ccr7","Il7r","Lef1","Sell",#Memory
+                                      "Gzma","Gzmb","Klrg1","Tbx21","Zeb2",#SLEC
+                                      "Ccl5", "Gzmk", "Klrc1", "Nkg7", "Cd38", "Cxcr3", "Cxcr6", "Fasl", "Ifng",#CD8 Effector
+                                      "Cd40lg","Il6ra",#Tcon effector
+                                      "Nt5e","Izumo1r",#Anergy
+                                      "Slamf6","Tcf7",#Progenitor
+                                      "Cd200","Il21","Tnfsf8", #Th21
+                                      "Rora","Il17f", "Stat3", "Ccr6",#Th17
+                                      "Bcl6","Cxcr5","Tox2",#Tfh
+                                      "Ctla4","Foxp3","Icos","Ikzf2","Il2ra","Tigit",#Tregs
+                                      "Cd610","Egr1","Egr2","Nr4a1",#Activation
+                                      "Ifit1","Ifit3","Isg15","Stat1",#Interferon sensing
+                                      "Mki67","Stmn1",#Proliferation
+                                      "Tox","Pdcd1","Lag3",#Exhaustion
+                                      "Klra8","Klrb1a","Eomes","Ncr1","Klre1", #NK
+                                      "Tcrg-C2",#Gamm_Delta-,"Trac","Cd3e"
+                                      "Hs3st1","Gata3",#ILC2
+                                      "Hebp1","Ncoa7","Cd74","Cited4","H2-Ab1","Rorc",#ILC3
+
+                                     
+)) + 
+  RotatedAxis() + scale_colour_gradient2(low = "blue", mid = "grey", high = "red")
+
+# Check average expression of Nkg7 per cluster
+AverageExpression(Tcells, features = "Cd8a", group.by = "seurat_clusters")
+
+# Define the T cell subtypes for each cluster
+TCellSubtype <- c("CD4 T Cell",  # Tcon central memory
+                  "CD8 T Cell",  # CD8 central memory
+                  "CD4 T Cell",  # Tcon effector~TBD
+                  "CD4 T Cell",  # Tcon progenitor like ~TBD
+                  "CD4 T Cell",  # Tregs
+                  "CD4 T Cell",  # Tcon central memory /memory~TBD
+                  "CD4 T Cell",  # Tcon Recently Activated 
+                  "CD4 T Cell",  # Tcon central memory
+                  "CD4 T Cell",  # Tcon central memory
+                  "CD8 T Cell",  # CD8 central memory
+                  "CD8 T Cell",  # CD8 central memory
+                  "NK Cell",     # NK Cell
+                  "CD4 T Cell",  # Tcon central memory/effector/progenitor~TBD
+                  "CD4 T Cell",  # Tcon central memory
+                  "CD8 T Cell",  # CD8 central memory
+                  "CD8 T Cell",  # CD8 central memory
+                  "Gamma Delta T Cell",  # Gamma Delta T Cell
+                  "ILC2",        # ILC2
+                  "CD8 T Cell",  # CD8 central memory
+                  "CD4 T Cell",  # Tcon Interferon Sensing
+                  "CD8 T Cell",  # CD8 central memory
+                  "CD8 T Cell",  # CD8 effector like SLEC
+                  "ILC3")        # ILC3
+
+# Ensure the Idents are in numeric format
+ident_integers <- as.integer(Idents(Tcells))
+
+# Check if there are any unexpected levels
+unique(ident_integers)
+
+# Add the T cell subtype information to the metadata of the Seurat object
+Tcells$TCellType <- TCellSubtype[as.integer(Idents(Tcells))]
+
+# Check the updated metadata
+head(Tcells@meta.data)
+DimPlot(Tcells,reduction = 'umap',group.by = "TCellType" ,label = T)
+
+### DEGs for Tcon memory cluster ---------------
+
+# Extract top genes for cluster 0
+cluster_0_genes <- top20_sct  %>% 
+  filter(cluster == 0) %>% 
+  pull(gene)
+# Print genes for cluster 0
+cat("Top 20 genes for Cluster 0:\n")
+print(cluster_0_genes)
+
+# Extract top genes for cluster 3
+cluster_3_genes <- top20_sct  %>% 
+  filter(cluster == 3) %>% 
+  pull(gene)
+# Print genes for cluster 3
+cat("Top 20 genes for Cluster 3:\n")
+print(cluster_3_genes)
+
+# Extract top genes for cluster 5
+cluster_5_genes <- top20_sct  %>% 
+  filter(cluster == 5) %>% 
+  pull(gene)
+# Print genes for cluster 5
+cat("Top 20 genes for Cluster 5:\n")
+print(cluster_5_genes)
+cluster5<- top20_sct  %>% 
+  filter(cluster == 5) 
+
+# Extract top genes for cluster 7
+cluster_7_genes <- top20_sct  %>% 
+  filter(cluster == 7) %>% 
+  pull(gene)
+# Print genes for cluster 7
+cat("Top 20 genes for Cluster 7:\n")
+print(cluster_7_genes)
+cluster7<- top20_sct  %>% 
+  filter(cluster == 7) 
+cluster7
+
+# Extract top genes for cluster 8
+cluster_8_genes <- top20_sct  %>% 
+  filter(cluster == 8) %>% 
+  pull(gene)
+# Print genes for cluster 8
+cat("Top 20 genes for Cluster 8:\n")
+print(cluster_8_genes)
+cluster8<- top20_sct  %>% 
+  filter(cluster == 8) 
+cluster8
+
+# Extract top genes for cluster 12
+cluster_12_genes <- top20_sct  %>% 
+  filter(cluster == 12) %>% 
+  pull(gene)
+# Print genes for cluster 12
+cat("Top 20 genes for Cluster 12:\n")
+print(cluster_12_genes)
+cluster12<- top20_sct  %>% 
+  filter(cluster == 12) 
+cluster12
+
+# Extract top genes for cluster 13
+cluster_13_genes <- top20_sct  %>% 
+  filter(cluster == 13) %>% 
+  pull(gene)
+# Print genes for cluster 13
+cat("Top 20 genes for Cluster 13:\n")
+print(cluster_13_genes)
+cluster13<- top20_sct  %>% 
+  filter(cluster == 13) 
+cluster13
+#Dotplot for checking CD4 Tcon memory subtypes
+DotPlot(Tcells, features = c( "Tnfrsf4","Tbc1d4","Cd4", #CD4
+                              "Cd8a","Blk",#CD8
+                              "Ccr7","Il7r","Lef1","Sell",#Memory
+                              "Igfbp4","Zbtb7b","Acvrl1","St8sia6","Myo10",#0
+                              "Crlf3","Selenop","Tent5c",#3
+                              "Trbv2",#5
+                              "Trbv4",#7
+                              "Trbv19",#8
+                              "Trbv1","Pdlim4",#12
+                              "Trbv20"#13
+                              
+                              
+                              
+)) + 
+  RotatedAxis() + scale_colour_gradient2(low = "blue", mid = "grey", high = "red")
+
+
+### DEGs for CD8 memory cluster ---------------
+cluster_1_genes <- top20_sct  %>% 
+  filter(cluster == 1) %>% 
+  pull(gene)
+# Print genes for cluster 1
+cat("Top 20 genes for Cluster 1:\n")
+print(cluster_1_genes)
+cluster1<- top20_sct  %>% 
+  filter(cluster == 1) 
+cluster1
+
+cluster_10_genes <- top20_sct  %>% 
+  filter(cluster == 10) %>% 
+  pull(gene)
+# Print genes for cluster 10
+cat("Top 20 genes for Cluster 10:\n")
+print(cluster_10_genes)
+cluster10<- top20_sct  %>% 
+  filter(cluster == 10) 
+cluster10
+
+cluster_10_genes <- top20_sct  %>% 
+  filter(cluster == 10) %>% 
+  pull(gene)
+# Print genes for cluster 10
+cat("Top 20 genes for Cluster 10:\n")
+print(cluster_10_genes)
+cluster10<- top20_sct  %>% 
+  filter(cluster == 10) 
+cluster10
+
+cluster_14_genes <- top20_sct  %>% 
+  filter(cluster == 14) %>% 
+  pull(gene)
+# Print genes for cluster 14
+cat("Top 20 genes for Cluster 14:\n")
+print(cluster_14_genes)
+cluster14<- top20_sct  %>% 
+  filter(cluster == 14) 
+cluster14
+
+cluster_15_genes <- top20_sct  %>% 
+  filter(cluster == 15) %>% 
+  pull(gene)
+# Print genes for cluster 15
+cat("Top 20 genes for Cluster 15:\n")
+print(cluster_15_genes)
+cluster15<- top20_sct  %>% 
+  filter(cluster == 15) 
+cluster15
+
+cluster_18_genes <- top20_sct  %>% 
+  filter(cluster == 18) %>% 
+  pull(gene)
+# Print genes for cluster 18
+cat("Top 20 genes for Cluster 18:\n")
+print(cluster_18_genes)
+cluster18<- top20_sct  %>% 
+  filter(cluster == 18) 
+cluster18
+
+cluster_20_genes <- top20_sct  %>% 
+  filter(cluster == 20) %>% 
+  pull(gene)
+# Print genes for cluster 20
+cat("Top 20 genes for Cluster 20:\n")
+print(cluster_20_genes)
+cluster20<- top20_sct  %>% 
+  filter(cluster == 20) 
+cluster20
+
+#Dotplot for checking CD8 memory subtypes
+DotPlot(Tcells, features = c( "Tnfrsf4","Tbc1d4","Cd4", #CD4
+                                            "Cd8a","Blk",#CD8
+                                            "Ccr7","Il7r","Lef1","Sell",#Memory
+                                            "Itgae","Ccr10","Adgrg5",#1
+                                            "Trbv14",#9
+                                            "Trbv29",#10
+                                            "Trbv19",#14
+                                            "Trbv17", #15 
+                                            "Trbv2"#18
+                              
+                                            
+)) + 
+  RotatedAxis() + scale_colour_gradient2(low = "blue", mid = "grey", high = "red")
+
+
+# Define the T cell subtypes for each cluster
+TCellDetailedSubtype <- c("Tcon memory",#0
+                  "CD8 memory", #1=Tissue Resident 
+                  "Tcon exhausted effector-like",  
+                  "Tcon memory",#3
+                  "Tregs",  # 4
+                  "Tcon memory",  #5 Antigen Specific Trbv2 Enriched
+                  "Tcon activated ",  #6 
+                  "Tcon memory",  # Antigen Specific Trbv4 Enriched
+                  "Tcon memory",  # 8-Antigen Specific Trbv19 Enriched
+                  "CD8 memory",  # 9- Antigen Specific Trbv14 Enriched
+                  "CD8 memory",  # 10- Antigen Specific Trbv29 Enriched
+                  "NK Cell",    
+                  "Tcon memory",  # Antigen Specific Trbv1 Enriched
+                  "Tcon memory",  # Antigen Specific Trbv20 Enriched
+                  "CD8 memory",  # 14-Antigen Specific Trbv19 Enriched
+                  "CD8 memory",  # 15-Antigen Specific Trbv17 Enriched
+                  "Gamma Delta T Cell",  
+                  "ILC2",        
+                  "CD8 memory",  # 18-Antigen Specific Trbv2 Enriched
+                  "Tcon Interferon Sensing",  #19 
+                  "CD8 memory",  # 20-Antigen Specific Trbv1 Enriched
+                  "CD8 exhausted effector-like",  #21 
+                  "ILC3")        
+
+# Ensure the Idents are in numeric format
+ident_integers <- as.integer(Idents(Tcells))
+
+# Check if there are any unexpected levels
+unique(ident_integers)
+
+# Add the T cell subtype information to the metadata of the Seurat object
+Tcells$TCellSubType <- TCellDetailedSubtype[as.integer(Idents(Tcells))]
+
+DimPlot(Tcells,reduction = 'umap',group.by = "TCellSubType" ,label = T)
+
+
+# Define the T cell subtypes for each cluster
+TCellDetailedMemorySubtype <- c("Tcon memory-1",#0
+                          "CD8 memory-1", #1=Tissue Resident 
+                          "Tcon exhausted effector-like",  
+                          "Tcon memory-1",#3
+                          "Tregs",  # 4
+                          "Tcon memory-2(Trbv2+)",  #5 Antigen Specific Trbv2 Enriched
+                          "Tcon activated ",  #6 
+                          "Tcon memory-3(Trbv4+)",  # Antigen Specific Trbv4 Enriched
+                          "Tcon memory-4(Trbv19+)",  # 8-Antigen Specific Trbv19 Enriched
+                          "CD8 memory-2(Trbv14+)",  # 9- Antigen Specific Trbv14 Enriched
+                          "CD8 memory-3(Trbv29+)",  # 10- Antigen Specific Trbv29 Enriched
+                          "NK Cell",    
+                          "Tcon memory-5(Trbv1+)",  # Antigen Specific Trbv1 Enriched
+                          "Tcon memory-6(Trbv20+)",  # Antigen Specific Trbv20 Enriched
+                          "CD8 memory-4(Trbv19+)",  # 14-Antigen Specific Trbv19 Enriched
+                          "CD8 memory-5(Trbv17+)",  # 15-Antigen Specific Trbv17 Enriched
+                          "Gamma Delta T Cell",  
+                          "ILC2",        
+                          "CD8 memory-6(Trbv2+)",  # 18-Antigen Specific Trbv2 Enriched
+                          "Tcon Interferon Sensing",  #19 
+                          "CD8 memory-7(Trbv1+)",  # 20-Antigen Specific Trbv1 Enriched
+                          "CD8 exhausted effector-like",  #21 
+                          "ILC3")        
+
+# Ensure the Idents are in numeric format
+ident_integers <- as.integer(Idents(Tcells))
+
+# Check if there are any unexpected levels
+unique(ident_integers)
+
+# Add the T cell subtype information to the metadata of the Seurat object
+Tcells$TCellMemorySubType <- TCellDetailedMemorySubtype[as.integer(Idents(Tcells))]
+
+DimPlot(Tcells,reduction = 'umap',group.by = "TCellMemorySubType" ,label = T)
+
+Tcells$Idents<-Idents(Tcells)
+
+unique(Tcells$Idents)
+
+Tcells = RenameIdents(Tcells, 
+                              "0" = "CD4 T Cell",#Tcon central memory
+                              "1" = "CD8 T Cell",#CD8 central memory
+                              "2" = "CD4 T Cell",#Tcon effector~TBD
+                              "3" = "CD4 T Cell",#Tcon progenitor like ~TBD
+                              "4" = "CD4 T Cell",#Tregs
+                              "5" = "CD4 T Cell",#Tcon central memory /memory~TBD
+                              "6" = "CD4 T Cell",#Tcon Recently Activated 
+                              "7" = "CD4 T Cell",#Tcon central memory
+                              "8" = "CD4 T Cell",#Tcon central memory
+                              "10" = "CD8 T Cell",#CD8 central memory
+                              "10" = "CD8 T Cell",#CD8 central memory
+                              "11" = "NK Cell",
+                              "12" = "CD4 T Cell",#Tcon central memory/effector/progenitor~TBD
+                              "13" = "CD4 T Cell",#Tcon central memory
+                              "14" = "CD8 T Cell",#CD8 central memory
+                              "15" = "CD8 T Cell",#CD8 central memory
+                              "16" = "Gamma Delta T Cell",
+                              "17" = "ILC2",
+                              "18" = "CD8 T Cell", #CD8 central memory
+                              "19" = "CD4 T Cell", #Tcon Interferon Sensing
+                              "20" = "CD8 T Cell",#CD8 central memory
+                              "21" = "CD8 T Cell",#CD8 effector like SLEC
+                              "22" = "ILC3")
+
+DimPlot(Tcells, reduction = "umap", 
+        #split.by = c( "Tx"), 
+        combine = F, label = T)
+saveRDS(Tcells, file = "./annotated_TCells_T1D_Timepoints_v1.rds")
+
+DimPlot(T1D_Timepoints, reduction = "umap", 
+        #split.by = c( "Tx"), 
+        combine = F, label = T)
+
+library(ggpubr)
+DimPlot(T1D_Timepoints, reduction = "umap", label = TRUE, pt.size = 0.5, label.size = 7, repel = T) +
+  theme_prism(base_size = 16, base_fontface = "bold") + 
+  theme(legend.text = element_text(size = 18)) +
+  labs( title = "UMAP of Cell Types") 
+ggsave(file = "UMAP_CellTypeclusters.png",
+       units = "in",width = 11, height = 11, dpi = 600)
+
+
+
+
+
 
 library(msigdbr)
 library(dplyr)
@@ -1420,7 +1284,7 @@ y_filt2$Subset = "Cluster 2 Bcells"
 
 y_filt3 = rbind(y_filt, y_filt1, y_filt2)
 
-y_filt3 = y_filt3[which(abs(y_filt3$NES)>1.9),]
+y_filt3 = y_filt3[which(abs(y_filt3$NES)>1.10),]
 
 ggplot(y_filt3, aes(x = Subset, y = fct_reorder(Description, abs(NES)))) + 
   geom_point(aes(color = abs(NES), size = qvalue) ) +
@@ -1469,953 +1333,117 @@ dev.off()
 
 
 # pseudobulk ----
-Idents(int.T1D_Timepoints) = "sample"
+# T1D_Timepoints$Cell.types <-Idents(T1D_Timepoints)
+# 
+# 
+# # pseudobulk cells by stimulation condition AND cell type AND donor
+# bulk <- AggregateExpression(T1D_Timepoints, group.by = c("time", "Cell.types", "group"),
+#                             assays = "RNA",
+#                             features = NULL,
+#                             return.seurat = FALSE,
+#                             #group.by = "Cell.types",
+#                             add.ident = NULL,
+#                             slot = "counts",
+#                             verbose = TRUE)
+# 
+# pseudobulk_PBS1 = AggregateExpression(
+#   subset(T1D_Timepoints, idents = c("PBS PreCh1")),
+#   assays = "RNA",
+#   features = NULL,
+#   return.seurat = FALSE,
+#   group.by = "Cell.types",
+#   add.ident = NULL,
+#   slot = "counts",
+#   verbose = TRUE
+# )
+# 
+# Idents(TNBC) = "Day"
+# pseudobulkD10 = AggregateExpression(
+#   subset(TNBC,idents = c("D10")),
+#   assays = "RNA",
+#   features = NULL,
+#   return.seurat = FALSE,
+#   group.by = "new.cluster.ids",
+#   add.ident = NULL,
+#   slot = "counts",
+#   verbose = TRUE
+# )
+# Idents(TNBC) = "new.cluster.ids"
+# head(pseudobulkD10)
+# 
+# Idents(TNBC) = "Day"
+# pseudobulkD7 = AggregateExpression(
+#   subset(TNBC,idents = c("D7")),
+#   assays = "RNA",
+#   features = NULL,
+#   return.seurat = FALSE,
+#   group.by = "new.cluster.ids",
+#   add.ident = NULL,
+#   slot = "counts",
+#   verbose = TRUE
+# )
+# Idents(TNBC) = "new.cluster.ids"
+# head(pseudobulkD7)
+# 
+# 
+# signature_genes1 = read.csv("/Users/lailarad/Documents/BI_EAE/aaron_pEAE/Signature_genes1.csv",row.names = NULL)
+# signature_genesTx = read.csv("/Users/lailarad/Documents/BI_EAE/Cohort1_RNA_seq/signature_genes_VLA4tx.csv",row.names = NULL)
+# signature_genes_day10_pEAE_bulk = read.csv("/Users/lailarad/Documents/BI_EAE/aaron_pEAE/aaronpEAE_signature_genes_day10.csv",row.names = NULL)
+# 
+# 
+# 
+# 
+# Features(int.T1D_Timepoints)
+# Features(int.T1D_Timepoints)[grepl("^H2-", Features(int.T1D_Timepoints))]
+# int.T1D_Timepoints[["RNA"]]$counts[grepl("^H2-", Features(int.T1D_Timepoints)),]
+# mat[grepl("^H2-", Features(int.T1D_Timepoints)),]
+# 
+# pseudobulkset = pseudobulk_PBS1
+# mat = pseudobulkset$RNA
+# mat=log(mat + 1, base = 2)
+# 
+# head(mat)
+# 
+# pseudobulkset = bulk
+# mat = pseudobulkset$RNA
+# mat=log(mat + 1, base = 2)
+# mat = mat - rowMeans(mat)
+# 
+# 
+# 
+# max(mat)
+# 
+# 
+# 
+# sigGenes = (intersect(rownames(mat), signature_genes1$x))
+# sigGenes = (intersect(rownames(mat), signature_genes_day10_pEAE_bulk$x))
+# sigGenes = (intersect(rownames(mat), signature_genesTx$genes))
+# 
+# pheatmap::pheatmap(t(mat),
+#                    #annotation_col = anno,
+#                    show_colnames = T,
+#                    fontsize_row = 18,
+#                    fontsize_col = 12,
+#                    cluster_cols = T,
+#                    cluster_rows = T,
+#                    #annotation_colors = ann_colors,
+#                    #filename = paste(path, "signatureCelltypesD710_vla4tx_log2.png",sep=""),
+#                    width = 8,
+#                    height = 5
+#                    
+#                    
+# )
+# dev.off()
+# getwd()
+# plots <- VlnPlot(TNBC, features = sigGenes[(25:31)], 
+#                  split.by = "sample",
+#                  group.by = "new.cluster.ids", pt.size = 0, combine = FALSE)
+# wrap_plots(plots = plots, ncol = 3)
+# 
+# DotPlot(TNBC, features = sigGenes) + 
+#   RotatedAxis()
 
 
-# pseudobulk cells by stimulation condition AND cell type AND donor
-bulk <- AggregateExpression(int.T1D_Timepoints, group.by = c("Tx", "Cell.types", "TP"),
-                            assays = "RNA",
-                            features = NULL,
-                            return.seurat = FALSE,
-                            #group.by = "Cell.types",
-                            add.ident = NULL,
-                            slot = "counts",
-                            verbose = TRUE)
-
-pseudobulk_PBS1 = AggregateExpression(
-  subset(int.T1D_Timepoints, idents = c("PBS PreCh1")),
-  assays = "RNA",
-  features = NULL,
-  return.seurat = FALSE,
-  group.by = "Cell.types",
-  add.ident = NULL,
-  slot = "counts",
-  verbose = TRUE
-)
-
-Idents(TNBC) = "Day"
-pseudobulkD9 = AggregateExpression(
-  subset(TNBC,idents = c("D9")),
-  assays = "RNA",
-  features = NULL,
-  return.seurat = FALSE,
-  group.by = "new.cluster.ids",
-  add.ident = NULL,
-  slot = "counts",
-  verbose = TRUE
-)
-Idents(TNBC) = "new.cluster.ids"
-head(pseudobulkD9)
-
-Idents(TNBC) = "Day"
-pseudobulkD7 = AggregateExpression(
-  subset(TNBC,idents = c("D7")),
-  assays = "RNA",
-  features = NULL,
-  return.seurat = FALSE,
-  group.by = "new.cluster.ids",
-  add.ident = NULL,
-  slot = "counts",
-  verbose = TRUE
-)
-Idents(TNBC) = "new.cluster.ids"
-head(pseudobulkD7)
-
-
-signature_genes1 = read.csv("/Users/lailarad/Documents/BI_EAE/aaron_pEAE/Signature_genes1.csv",row.names = NULL)
-signature_genesTx = read.csv("/Users/lailarad/Documents/BI_EAE/Cohort1_RNA_seq/signature_genes_VLA4tx.csv",row.names = NULL)
-signature_genes_day9_pEAE_bulk = read.csv("/Users/lailarad/Documents/BI_EAE/aaron_pEAE/aaronpEAE_signature_genes_day9.csv",row.names = NULL)
-
-
-
-
-Features(int.T1D_Timepoints)
-Features(int.T1D_Timepoints)[grepl("^H2-", Features(int.T1D_Timepoints))]
-int.T1D_Timepoints[["RNA"]]$counts[grepl("^H2-", Features(int.T1D_Timepoints)),]
-mat[grepl("^H2-", Features(int.T1D_Timepoints)),]
-
-pseudobulkset = pseudobulk_PBS1
-mat = pseudobulkset$RNA
-mat=log(mat + 1, base = 2)
-
-head(mat)
-
-pseudobulkset = bulk
-mat = pseudobulkset$RNA
-mat=log(mat + 1, base = 2)
-mat = mat - rowMeans(mat)
-
-
-
-max(mat)
-
-
-
-sigGenes = (intersect(rownames(mat), signature_genes1$x))
-sigGenes = (intersect(rownames(mat), signature_genes_day9_pEAE_bulk$x))
-sigGenes = (intersect(rownames(mat), signature_genesTx$genes))
-
-pheatmap::pheatmap(t(mat),
-                   #annotation_col = anno,
-                   show_colnames = T,
-                   fontsize_row = 18,
-                   fontsize_col = 12,
-                   cluster_cols = T,
-                   cluster_rows = T,
-                   #annotation_colors = ann_colors,
-                   #filename = paste(path, "signatureCelltypesD79_vla4tx_log2.png",sep=""),
-                   width = 8,
-                   height = 5
-                   
-                   
-)
-dev.off()
-getwd()
-plots <- VlnPlot(TNBC, features = sigGenes[(25:31)], 
-                 split.by = "sample",
-                 group.by = "new.cluster.ids", pt.size = 0, combine = FALSE)
-wrap_plots(plots = plots, ncol = 3)
-
-DotPlot(TNBC, features = sigGenes) + 
-  RotatedAxis()
-
-
-## ----Top Gene changing over time per Cell Type in PBS mice--------------------------------------------------------------------------------------------
-unique(int.T1D_Timepoints$sample)
-Idents(int.T1D_Timepoints) = int.T1D_Timepoints$Cell.Type.TP.Tx
-
-Idents(int.T1D_Timepoints) = "sample"
-
-int.T1D_Timepoints$Cell.Type.TP.Tx = paste0(int.T1D_Timepoints$Cell.types, "_", int.T1D_Timepoints$TP, "_", int.T1D_Timepoints$Tx)
-unique(int.T1D_Timepoints$Cell.Type.TP.Tx)
-
-PBS1_7 = subset(int.T1D_Timepoints, idents = c("PBS PreCh1", "PBS Ch7") )
-
-TH17ILC_1_4 = FindMarkers(
-  int.T1D_Timepoints,
-  ident.1 = "Th17 ILC_Ch4_PBS",
-  ident.2 = "Th17 ILC_PreCh1_PBS", 
-  only.pos = T
-)
-TH17ILC_4_7 = FindMarkers(
-  int.T1D_Timepoints,
-  ident.1 =  "Th17 ILC_Ch7_PBS",
-  ident.2 =  "Th17 ILC_Ch4_PBS",
-  only.pos = T
-)
-
-TH17ILC_1_7 = FindMarkers(
-  int.T1D_Timepoints,
-  ident.1 =  "Th17 ILC_Ch7_PBS",
-  ident.2 =  "Th17 ILC_PreCh1_PBS",
-  only.pos = T
-)
-
-TH17ILC_1_4 = TH17ILC_1_4[which(TH17ILC_1_4$p_val_adj <0.05),]
-TH17ILC_4_7 = TH17ILC_4_7[which(TH17ILC_4_7$p_val_adj <0.05),]
-TH17ILC_1_7 = TH17ILC_1_7[which(TH17ILC_1_7$p_val_adj <0.05& TH17ILC_1_7$pct.1 > 0.5),]
-TH17ILC_4_7[intersect(rownames(TH17ILC_1_4), rownames(TH17ILC_4_7)),]
-TH17ILC_1_4[intersect(rownames(TH17ILC_1_4), rownames(TH17ILC_4_7)),]
-
-int.T1D_Timepoints$TP = factor(int.T1D_Timepoints$TP,levels = c("PreCh1", "Ch4", "Ch7") )
-Idents(PBS1_7) = "Cell.types"
-unique(Idents(PBS1_7))
-TH17 = subset(PBS1_7, idents = "Th17 ILC")
-VlnPlot(TH17, features = "Bcl2",
-        group.by = "TP",assay = "RNA")
-
-
-Idents(int.T1D_Timepoints) = int.T1D_Timepoints$Cell.Type.TP.Tx
-unique(Idents(int.T1D_Timepoints))
-
-CD8T_1_7 = FindMarkers(
-  int.T1D_Timepoints,
-  ident.1 =  "CD8 T Cells_Ch7_PBS",
-  ident.2 =  "CD8 T Cells_PreCh1_PBS",
-  only.pos = F
-)
-
-CD8T_1_7 = CD8T_1_7[which(CD8T_1_7$p_val_adj <0.05),]
-
-unique(Idents(PBS1_7))
-CD8Tsub = subset(PBS1_7, idents = "CD8 T Cells")
-
-CD8_vp = VlnPlot(CD8Tsub, features = "Ccl5",
-        group.by = "TP",assay = "RNA", pt.size = 1) + 
-  labs(x = "CD8 T Cells") +ylim(0,8) +
-  theme_prism(base_size = 14,base_line_size = 1.5) +
-  theme(
-    plot.title = element_text(angle = 0, vjust = 0.5),
-    axis.title.x = element_text(angle = 0, vjust = 0.5, size = 14, face = "bold"),
-    axis.text.x = element_text(angle = 0, vjust = 0.5, size = 14, face = "bold"),
-    axis.line = element_line(linewidth = 2)
-  ) 
-
-CD8_vp$layers[[1]]$aes_params$size = 1.2
-CD8_vp + NoLegend()
-
-CD4T_1_7 = FindMarkers(
-  int.T1D_Timepoints,
-  ident.1 =  "CD4 T Cells_Ch7_PBS",
-  ident.2 =  "CD4 T Cells_PreCh1_PBS",
-  only.pos = T
-)
-
-CD4T_1_7 = CD4T_1_7[which(CD4T_1_7$p_val_adj <0.05 & CD4T_1_7$pct.1 > 0.5),]
-
-unique(Idents(PBS1_7))
-CD4Tsub = subset(PBS1_7, idents = "CD4 T Cells")
-CD4_vp = VlnPlot(CD4Tsub, features = "Ctla4",
-        group.by = "TP",assay = "RNA", pt.size = 1) + labs(x = "CD4 T Cells") +
-   ylim(0,8) +
-  theme_prism(base_size = 14,base_line_size = 1.5) +
-  theme(
-    plot.title = element_text(angle = 0, vjust = 0.5),
-    axis.title.x = element_text(angle = 0, vjust = 0.5, size = 14, face = "bold"),
-    axis.text.x = element_text(angle = 0, vjust = 0.5, size = 14, face = "bold"),
-    axis.line = element_line(linewidth = 2)
-  ) 
-
-CD4_vp$layers[[1]]$aes_params$size = 1.2
-CD4_vp + NoLegend()
-
-Bcell_1_7 = FindMarkers(
-  int.T1D_Timepoints,
-  ident.1 =  "B Cells_Ch7_PBS",
-  ident.2 =  "B Cells_PreCh1_PBS",
-  only.pos = T
-)
-
-Idents(int.T1D_Timepoints) = int.T1D_Timepoints$Cell.Type.TP.Tx
-Bcell_1_7df = FindMarkers(
-  int.T1D_Timepoints,
-  ident.1 =  "B Cells_Ch7_PBS",
-  ident.2 =  "B Cells_PreCh1_PBS",
-  only.pos = F
-)
-
-
-write.csv(Bcell_1_7df, file = "BcellT1D_Timepoints_1_7.csv")
-
-Bcell_1_7 = Bcell_1_7[which(Bcell_1_7$p_val_adj <0.05 & Bcell_1_7$pct.1 > 0.5),]
-
-unique(Idents(PBS1_7))
-Bcellsub = subset(PBS1_7, idents = "B Cells")
-gene = "Egr1"
-gene = "Apoe"
-gene = "Scd1"
-B_vp = VlnPlot(Bcellsub, features = gene,
-        group.by = "TP",assay = "RNA", pt.size = 1) + labs(x = "B Cells") +
- # ylim(0,8) +
-  theme_prism(base_size = 14,base_line_size = 1.5) +
-  theme(
-    plot.title = element_text(angle = 0, vjust = 0.5),
-    axis.title.x = element_text(angle = 0, vjust = 0.5, size = 14, face = "bold"),
-    axis.text.x = element_text(angle = 0, vjust = 0.5, size = 14, face = "bold"),
-    axis.line = element_line(linewidth = 2)
-  ) 
-
-B_vp$layers[[1]]$aes_params$size = 1.2
-B_vp + NoLegend()
-
-#Early Growth Response-1 Plays a Non-redundant Role in the Differentiation of B Cells into Plasma Cells
-#https://doi.org/10.4110%2Fin.2015.15.3.161 
-
-
-MHCMac_1_7 = FindMarkers(
-  int.T1D_Timepoints,
-  ident.1 =  "MHCII+ Mac_Ch7_PBS",
-  ident.2 =  "MHCII+ Mac_PreCh1_PBS",
-  only.pos = F
-)
-
-
-MHCMac_1_7df = FindMarkers(
-  int.T1D_Timepoints,
-  ident.1 =  "MHCII+ Mac_Ch7_PBS",
-  ident.2 =  "MHCII+ Mac_PreCh1_PBS",
-  only.pos = F
-)
-
-write.csv(MHCMac_1_7df, file = "MHCMac_1_7df.csv")
-
-MHCMac_1_7 = MHCMac_1_7[which(MHCMac_1_7$p_val_adj <0.05),]
-MHCMacsub = subset(PBS1_7, idents = "MHCII+ Mac")
-gene =  "H2-Aa"
-gene = "Il1b"
-gene = "Hcar2"
-gene = "Selenop"
-MHCMac_vp = VlnPlot(MHCMacsub, features = gene,
-        group.by = "TP",assay = "RNA", pt.size = 1) + 
-  labs(x = "MHC-II Mac") +ylim(0,8) +
-  theme_prism(base_size = 14,base_line_size = 1.5) +
-  theme(
-    plot.title = element_text(angle = 0, vjust = 0.5),
-    axis.title.x = element_text(angle = 0, vjust = 0.5, size = 14, face = "bold"),
-    axis.text.x = element_text(angle = 0, vjust = 0.5, size = 14, face = "bold"),
-    axis.line = element_line(linewidth = 2)
-  ) 
-
-MHCMac_vp$layers[[1]]$aes_params$size = 1.2
-MHCMac_vp + NoLegend()
-
-InfMac_1_7 = FindMarkers(
-  int.T1D_Timepoints,
-  ident.1 =  "Inflam. Mac_Ch7_PBS",
-  ident.2 =  "Inflam. Mac_PreCh1_PBS",
-  only.pos = F
-)
-
-
-InfMac_1_7df = FindMarkers(
-  int.T1D_Timepoints,
-  ident.1 =  "Inflam. Mac_Ch7_PBS",
-  ident.2 =  "Inflam. Mac_PreCh1_PBS",
-  only.pos = F
-)
-
-
-write.csv(InfMac_1_7df, file = "InfMac_1_7df.csv")
-
-InfMac_1_7 = InfMac_1_7[which(InfMac_1_7$p_val_adj <0.05 & InfMac_1_7$pct.2 > 0.3),]
-
-unique(Idents(PBS1_7))
-InfMacsub = subset(PBS1_7, idents = "Inflam. Mac")
-gene = "Tff2"
-gene= "Il1b"
-gene = "Cxcl2"
-InfMac_vp = VlnPlot(InfMacsub, features = gene,
-        group.by = "TP",assay = "RNA", pt.size = 1) + 
-  labs(x = "Inflam. Mac") +ylim(0,8) +
-  theme_prism(base_size = 14,base_line_size = 1.5) +
-  theme(
-    plot.title = element_text(angle = 0, vjust = 0.5),
-    axis.title.x = element_text(angle = 0, vjust = 0.5, size = 14, face = "bold"),
-    axis.text.x = element_text(angle = 0, vjust = 0.5, size = 14, face = "bold"),
-    axis.line = element_line(linewidth = 2)
-  ) 
-
-InfMac_vp$layers[[1]]$aes_params$size = 1.2
-InfMac_vp + NoLegend()
-
-DC_1_7 = FindMarkers(
-  int.T1D_Timepoints,
-  ident.1 =  "DCs_Ch7_PBS",
-  ident.2 =  "DCs_PreCh1_PBS",
-  only.pos = F
-)
-
-DC_1_7df = FindMarkers(
-  int.T1D_Timepoints,
-  ident.1 =  "DCs_Ch7_PBS",
-  ident.2 =  "DCs_PreCh1_PBS",
-  only.pos = F
-)
-
-
-write.csv(DC_1_7df, file = "DC_1_7df.csv")
-
-DC_1_7 = DC_1_7[which(DC_1_7$p_val_adj <0.05 & DC_1_7$pct.2 > 0.3),]
-
-unique(Idents(PBS1_7))
-DCsub = subset(PBS1_7, idents = "DCs")
-gene = "Irf8"
-gene = "Klra17"
-gene = "Zdhhc14"
-DC_vp = VlnPlot(DCsub, features = gene,
-        group.by = "TP",assay = "RNA", pt.size = 1) + 
-  labs(x = "DCs") +ylim(0,8) +
-  theme_prism(base_size = 14,base_line_size = 1.5) +
-  theme(
-    plot.title = element_text(angle = 0, vjust = 0.5),
-    axis.title.x = element_text(angle = 0, vjust = 0.5, size = 14, face = "bold"),
-    axis.text.x = element_text(angle = 0, vjust = 0.5, size = 14, face = "bold"),
-    axis.line = element_line(linewidth = 2)
-  ) 
-
-DC_vp$layers[[1]]$aes_params$size = 1.2
-DC_vp + NoLegend() 
-
-CD103DC_1_7 = FindMarkers(
-  int.T1D_Timepoints,
-  ident.1 =  "CD103+ DCs_Ch7_PBS",
-  ident.2 =  "CD103+ DCs_PreCh1_PBS",
-  only.pos = F
-)
-
-CD103DC_1_7df = FindMarkers(
-  int.T1D_Timepoints,
-  ident.1 =  "CD103+ DCs_Ch7_PBS",
-  ident.2 =  "CD103+ DCs_PreCh1_PBS",
-  only.pos = F
-)
-
-write.csv(CD103DC_1_7df, file = "CD103DC_1_7df.csv")
-
-CD103DC_1_7 = CD103DC_1_7[which(CD103DC_1_7$p_val_adj <0.05),]
-
-unique(Idents(PBS1_7))
-CD103DCsub = subset(PBS1_7, idents = "CD103+ DCs")
-gene = "Slpi"
-gene = "Zdhhc14"
-CD103DC_vp = VlnPlot(CD103DCsub, features = gene,
-        group.by = "TP",assay = "RNA", pt.size = 1) +
-  labs(x = "CD103 DCs") + ylim(0,8) +
-  theme_prism(base_size = 14,base_line_size = 1.5) +
-  theme(
-    plot.title = element_text(angle = 0, vjust = 0.5),
-    axis.title.x = element_text(angle = 0, vjust = 0.5, size = 14, face = "bold"),
-    axis.text.x = element_text(angle = 0, vjust = 0.5, size = 14, face = "bold"),
-    axis.line = element_line(linewidth = 2)
-  ) 
-
-CD103DC_vp$layers[[1]]$aes_params$size = 1.2
-CD103DC_vp + NoLegend() 
-#Secretory leukoprotease inhibitor in mucosal lymph node dendritic cells regulates the threshold for mucosal tolerance
-
-Mast_1_7 = FindMarkers(
-  int.T1D_Timepoints,
-  ident.1 =  "Mast Cells_Ch7_PBS",
-  ident.2 =  "Mast Cells_PreCh1_PBS",
-  only.pos = F
-)
-
-
-Mast_1_7df = FindMarkers(
-  int.T1D_Timepoints,
-  ident.1 =  "Mast Cells_Ch7_PBS",
-  ident.2 =  "Mast Cells_PreCh1_PBS",
-  only.pos = F
-)
-
-write.csv(Mast_1_7df, file = "Mast_1_7df.csv")
-
-Mast_1_7 = Mast_1_7[which(Mast_1_7$p_val_adj <0.05 & Mast_1_7$pct.1>0.5),]
-
-unique(Idents(PBS1_7))
-Mastsub = subset(PBS1_7, idents = "Mast Cells")
-gene = "Serpina3g"
-gene = "Muc13"
-gene = "Hdc"
-mast_vp = VlnPlot(Mastsub, features = gene,
-        group.by = "TP",assay = "RNA", , pt.size = 1) + 
-  labs(x = "Mast Cells") + ylim(0,8) +
-  theme_prism(base_size = 14,base_line_size = 1.5) +
-  theme(
-    plot.title = element_text(angle = 0, vjust = 0.5),
-    axis.title.x = element_text(angle = 0, vjust = 0.5, size = 14, face = "bold"),
-    axis.text.x = element_text(angle = 0, vjust = 0.5, size = 14, face = "bold"),
-    axis.line = element_line(linewidth = 2)
-  ) 
-
-mast_vp$layers[[1]]$aes_params$size = 1.2
-mast_vp + NoLegend() 
-
-#high in BMMC and low perotineal 
-#https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7564378/
-
-
-Neut_1_7 = FindMarkers(
-  int.T1D_Timepoints,
-  ident.1 =  "Neutrophil_Ch7_PBS",
-  ident.2 =  "Neutrophil_PreCh1_PBS",
-  only.pos = F
-)
-
-Neut_1_7df = FindMarkers(
-  int.T1D_Timepoints,
-  ident.1 =  "Neutrophil_Ch7_PBS",
-  ident.2 =  "Neutrophil_PreCh1_PBS",
-  only.pos = F
-)
-
-write.csv(Neut_1_7df, file = "Neut_1_7df.csv")
-
-Neut_1_7 = Neut_1_7[which(Neut_1_7$p_val_adj <0.05),]
-
-unique(Idents(PBS1_7))
-Neutsub = subset(PBS1_7, idents = "Neutrophil")
-gene = "Ppp1r16b"
-gene = "Cxcr2"
-Neut_vp = VlnPlot(Neutsub, features = gene ,
-        group.by = "TP",assay = "RNA", pt.size = 1, layer = "data") +
-  labs(x = "Neut") + ylim(0,8) +
-  theme_prism(base_size = 14,base_line_size = 1.5) +
-  theme(
-    plot.title = element_text(angle = 0, vjust = 0.5),
-    axis.title.x = element_text(angle = 0, vjust = 0.5, size = 14, face = "bold"),
-    axis.text.x = element_text(angle = 0, vjust = 0.5, size = 14, face = "bold"),
-    axis.line = element_line(linewidth = 2)
-  ) 
-
-Neut_vp$layers[[1]]$aes_params$size = 1.2
-Neut_vp + NoLegend() 
-
-NK_1_7 = FindMarkers(
-  int.T1D_Timepoints,
-  ident.1 =  "NK_Ch7_PBS",
-  ident.2 =  "NK_PreCh1_PBS",
-  only.pos = F
-)
-
-NK_1_7df = FindMarkers(
-  int.T1D_Timepoints,
-  ident.1 =  "NK_Ch7_PBS",
-  ident.2 =  "NK_PreCh1_PBS",
-  only.pos = F
-)
-
-write.csv(NK_1_7df, file = "NK_1_7df.csv")
-
-NK_1_7 = NK_1_7[which(NK_1_7$p_val_adj <0.05 & NK_1_7$pct.1 > 0.5),]
-
-unique(Idents(PBS1_7))
-NKsub = subset(PBS1_7, idents = "NK")
-gene = "Gzma"
-gene = "Acaca"
-gene = "Nr4a2"
-NK_vp = VlnPlot(NKsub, features = gene,
-        group.by = "TP",assay = "RNA", pt.size = 1) +
-   labs(x = "NKs") + ylim(0,8) +
-  theme_prism(base_size = 14,base_line_size = 1.5) +
-  theme(
-    plot.title = element_text(angle = 0, vjust = 0.5),
-    axis.title.x = element_text(angle = 0, vjust = 0.5, size = 14, face = "bold"),
-    axis.text.x = element_text(angle = 0, vjust = 0.5, size = 14, face = "bold"),
-    axis.line = element_line(linewidth = 2)
-  ) 
-
-NK_vp$layers[[1]]$aes_params$size = 1.2
-NK_vp + NoLegend() 
-library(ggpubr)
-
-png(file = "CellType_VlnPlts_Ch17.png", units = "in",width = 5, height = 20, res = 400)
-ggarrange(Neut_vp,NK_vp,mast_vp,CD103DC_vp , DC_vp , InfMac_vp , MHCMac_vp , B_vp , CD8_vp , CD4_vp, ncol = 10, nrow = 1, legend = F) 
-ggsave(file = "CellType_VlnPlts_Ch17.png",
-    units = "px",width = 10000, height = 1200, dpi = 400)
-
-
-
-patchwork = Neut_vp + NK_vp + mast_vp + CD103DC_vp + DC_vp + InfMac_vp + MHCMac_vp + B_vp + CD8_vp + CD4_vp
-
-
-int.T1D_Timepoints$cell.types.combT = int.T1D_Timepoints$Cell.types
-
-Idents(int.T1D_Timepoints) = int.T1D_Timepoints$cell.types.combT
-unique(Idents(int.T1D_Timepoints))
-
-Idents(int.T1D_Timepoints) = "sample"
-PBS1_7 = subset(int.T1D_Timepoints, idents = c("PBS PreCh1", "PBS Ch7") )
-Idents(PBS1_7) = PBS1_7$Cell.types
-PBS1_7 = RenameIdents(PBS1_7, 
-
-             "CD4 T Cells" = "T Cells",
-             "CD8 T Cells" = "T Cells"
-             )
-
-PBS1_7$cell.types.combT = Idents(PBS1_7)
-
-PBS1_7$Cell.Type.TP.Tx_combT = paste0(PBS1_7$cell.types.combT, "_", PBS1_7$TP, "_", PBS1_7$Tx)
-unique(PBS1_7$Cell.Type.TP.Tx_combT)
-Idents(PBS1_7) = "Cell.Type.TP.Tx_combT"
-
-T_C_1_7 = FindMarkers(
-  PBS1_7,
-  ident.1 = "T Cells_Ch7_PBS",
-  ident.2 = "T Cells_PreCh1_PBS", 
-  only.pos = F
-)
-
-
-T_C_1_7df = FindMarkers(
-  PBS1_7,
-  ident.1 = "T Cells_Ch7_PBS",
-  ident.2 = "T Cells_PreCh1_PBS", 
-  only.pos = F
-)
-write.csv(T_C_1_7df, file = "T_C_1_7df.csv")
-
-T_C_1_7 = T_C_1_7[which(T_C_1_7$p_val_adj <0.05 & T_C_1_7$pct.1 > 0.4),]
-Idents(PBS1_7) = "cell.types.combT"
-unique(Idents(PBS1_7))
-Tsub = subset(PBS1_7, idents = "T Cells")
-gene = "Il17rb"
-gene = "Dtx3"
-gene = "Sh2d1a"
-
-T_vp = VlnPlot(Tsub, features = gene,
-        group.by = "TP",assay = "RNA", pt.size = 1) + labs(x = "T Cells") +
-   ylim(0,8) +
-  theme_prism(base_size = 14,base_line_size = 1.5) +
-  theme(
-    plot.title = element_text(angle = 0, vjust = 0.5),
-    axis.title.x = element_text(angle = 0, vjust = 0.5, size = 14, face = "bold"),
-    axis.text.x = element_text(angle = 0, vjust = 0.5, size = 14, face = "bold"),
-    axis.line = element_line(linewidth = 2)
-  ) 
-
-T_vp$layers[[1]]$aes_params$size = 1.2
-T_vp + NoLegend()
-    
-cairo_pdf("CellType_VlnPlts_combT_Ch17_DEGs.pdf", width = 10, height =  12
-  
-)
-ggarrange(Neut_vp,
-          NK_vp,
-          mast_vp,
-          CD103DC_vp , 
-          DC_vp , InfMac_vp , MHCMac_vp , B_vp , T_vp, ncol = 10, nrow = 1, legend = F) 
-
-ggarrange( T_vp,
-           B_vp,
-          mast_vp, ncol = 10, nrow = 1, legend = F) 
-ggsave(file = "CellType_VlnPlts_combT_Ch17_DEGs.pdf",
-    units = "px",width = 7000, height = 1200, dpi = 400)
-
-
-#' 
-#' 
-#' 
-#' 
-#' 
-#' 
-#' 
-#' 
-#' 
-#' 
-#' 
-#' 
-#' 
-#' 
-
-#Redo Cluster IDs B cells and Plasma Cells -----
-#Int.T1D_Timepoints clusters: 
-# Cluster 0 Plasma Cells? Jchain Sdc1 Tnfrsf13b Slamf7
-# Cluster 1 ILC type 3 Rorc+ Th17 https://doi.org/10.1016/j.cell.2016.07.043 NK? Ncr1 No CD45/Ptprc
-# Cluster 2 DCs CD4+ Cd8b1 in NP? DC? Itgax/CD11c+ SiglecH DC-sign(Cd209a/d) Clec9a
-# Cluster 3 Naive? B cell Cd19 Ighd Cd22 Cd40 Cd20 Mhc
-# Cluster 4 Tgd? cells CD3 CD4 Tcrg-V4 
-# Cluster 5 ?? Ighm No CD45 Jchain
-# Cluster 6 ILC type 3 Rorc+ Th17 https://doi.org/10.1016/j.cell.2016.07.043
-# Cluster 7 ILC type 3 Gata3+ Th2 https://doi.org/10.1016/j.cell.2016.07.043
-# Cluster 8 NK Ncr1 Klre1 Klri1 Gmza
-# Cluster 9 Mast Cells CD3 MCPT1 Fcer1a No CD45? Kit/CD117+
-# Cluster 10 Plasma?? Ighg1 Igha Jchain Sdc1 No CD45
-# Cluster 11 Mac?? or Eosinophil? f4/80/Adgre1 (apprently eosinophil have F4/80 in mice) Metalloendopeptidase ADAM-like Decysin 1 (ADAMDEC1) Marker for Inflammatory Bowel Disease https://doi.org/10.3390%2Fijms23095007
-# Cluster 12 Treg Cd3 CD4 Foxp3 Il10 Ctla4
-# Cluster 13 ?? No CD45 low Jchain
-# Cluster 14 Different kind of Treg? Cd3 Cd4 Foxp3 Gzma Gzmb Il10 Cd5
-# Cluster 15 ?? No CD45 low Jchain
-# Cluster 16 Cd103+ DC Cd86 Clec9a Itgae/Cd103 Mhc
-# Cluster 17 Stromal Collagen DCn No CD45
-# Cluster 18 Th2 T cells Cd3 Cd4 Il17rb Il4 Gata3 Il13 Il5
-# Cluster 19 ? low exp Cd3 Cd4 low Jchain? No CD45
-# Cluster 20 ? low exp Cd3 Np Cd4? Jchain No CD45
-# Cluster 21 Plasma? Jchain No CD45
-# Cluster 22 Plasma? Jchain No CD45
-# Cluster 23 Neut?  S100a8/9 has CD45
-# Cluster 24 Mac/Mon/eosinophil>??? Mhc Cd14 Apoe Lyz2 Adgre1/f4/80 Itgam Fcgr3/Cd16 
-# Cluster 25 Plasma? Jchain Igha No CD45
-# Cluster 26 Plasma? Jchain Igha Ly6a/m? No CD45
-# Cluster 27 CD8 T cell Cd3 Cd8a Cd8b Tcrg-V7 Ifng
-# Cluster 28 B cells Cd19 Cd20 Mhc
-# Cluster 29 ILC type 3 Rorc+ Th17 https://doi.org/10.1016/j.cell.2016.07.043
-# Cluster 30 Acinar
-
-
-#old IDs
-DotPlot(int.T1D_Timepoints, features =c(
-  "Ptprc", #CD45
-  "Cd3e", "Cd4", "Cd8a", "Cd8b1", # Tcells
-  "Il7r","Cd5","Rorc","Gata3", "Maff","Il23r", #ILC
-  "Mcpt1", "Fcer1a", "Kit", #Mast Cells
-  "Xcl1","Ncr1", "Klre1", "Klri1", "Gzma", "Gzmb",#NK
-  "Col4a1","Flt1","Nkx2-3", "Tie1", #Stromal
-  "S100a8", "S100a9", #Neut
-  "Clec9a",  "Itgax", "Cd209a", # DCs /CD11c+ SiglecH DC-sign(Cd209a/d)
-  "Itgae",#CD103
-  "Itgam", "Adgre1", "Adgre4","Apoe","Cd14","Ms4a7", "Cd68", #Mac
-  "Mrc1", "Msr1", "Fcgr3",  "Ccr3", "Cxcl2",  "Cx3cr1", "Il1a", "Il1b","Ccr2", #Mac
-  "H2-DMb1", "H2-DMb2","H2-Eb1", "H2-Aa", "H2-Ab1", "H2-DMa", #MHC-II
-  "Cd19",  "Ms4a1","Ighd","Ighm", "Cd22", #Bcells
-  "Jchain", "Sdc1", "Tnfrsf13b", "Igha", "Ighe"  #Plasma 
-), group.by = "Cell.types", scale = F
-) + 
-  RotatedAxis() + scale_colour_gradient2(low = "blue", mid = "grey", high = "red") +  theme_prism( base_size = 12) +
-  theme(axis.text.x =element_text(angle = 45, hjust=1, vjust = 1, size = 8, face = "plain"))
-
-
-DotPlot(int.T1D_Timepoints, features =c(
-  "Ptprc", #CD45
-  "Cd3e", "Cd4", "Cd8a", "Cd8b1", # Tcells
-  "Il7r","Cd5","Rorc","Gata3", "Maff","Il23r", #ILC
-  "Mcpt1", "Fcer1a", "Kit", #Mast Cells
-  "Xcl1","Ncr1", "Klre1", "Klri1", "Gzma", "Gzmb",#NK
-  "Col4a1","Flt1","Nkx2-3", "Tie1", #Stromal
-  "S100a8", "S100a9", #Neut
-  "Clec9a",  "Itgax", "Cd209a", # DCs /CD11c+ SiglecH DC-sign(Cd209a/d)
-  "Itgae",#CD103
-  "Itgam", "Adgre1", "Adgre4","Apoe","Cd14","Ms4a7", "Cd68", #Mac
-  "Mrc1", "Msr1", "Fcgr3",  "Ccr3", "Cxcl2",  "Cx3cr1", "Il1a", "Il1b","Ccr2", #Mac
-  "H2-DMb1", "H2-DMb2","H2-Eb1", "H2-Aa", "H2-Ab1", "H2-DMa", #MHC-II
-  "Cd19",  "Ms4a1","Ighd","Ighm", "Cd22", #Bcells
-  "Jchain", "Sdc1", "Tnfrsf13b", "Tnfrsf17", "Slamf7" , "Slc3a2", "Slc7a5",
-  "Ly6a", "Ly6c1", "Ly6c2", "Ly6k", "Cd28",
-  "Igha", "Ighe", "Ighg1", "Ighg2b", "Ighg2c", "Ighg3", "Ighmbp2",  #Plasma
-  "Ctrc", "Pnliprp1", "Rnase1", #Acinar
-  "Muc2", "Spink4", "ClCa1", "Krt7","Krt8", "Prom1" #Goblet/Gastric Secreting Parietal cells
-  
-),  scale = F, group.by = "Cell.types2"
-) + 
-  RotatedAxis() + scale_colour_gradient2(low = "blue", mid = "grey", high = "red") +  theme_prism(base_family = "Arial", base_size = 12) +
-  theme(axis.text.x =element_text(angle = 45, hjust=1, vjust = 1, size = 8, face = "plain"))
-
-ggsave(file = "DotplotMarkergenes_17clusters.png",
-       units = "in",width = 14, height = 5, dpi = 400)
-
-
-Idents(int.T1D_Timepoints) = "seurat_clusters"
-
-Features(int.T1D_Timepoints)[grepl("^Igh", Features(int.T1D_Timepoints))]
-
-int.T1D_Timepoints = RenameIdents(int.T1D_Timepoints, 
-                        "0" = "Plasma Cells 1",
-                        "1" = "Th17 ILC",
-                        "2" = "DCs",
-                        "3" = "B Cells",
-                        "4" = "CD4 T Cells 1",
-                        "5" = "Plasma Cells 2",
-                        "6" = "Th17 ILC",
-                        "7" = "Th2 ILC",
-                        "8" = "NK",
-                        "9" = "Mast Cells",
-                        "10" = "IgG1+ Plasma Cells",
-                        "11" = "Inflam. Mac",
-                        "12" = "CD4 T Cells 2",
-                        "13" = "Stromal Cells",
-                        "14" = "CD4 T Cells 3",
-                        "15" = "Stromal Cells",
-                        "16" = "CD103+ DCs",
-                        "17" = "Stromal Cells",
-                        "18" = "CD4 T Cells 4",
-                        "19" = "Plasma Cells 4",
-                        "20" = "Plasma Cells 5",
-                        "21" = "Plasma Cells 6",
-                        "22" = "Plasma Cells 7",
-                        "23" = "Neutrophil",
-                        "24" = "MHCII+ Mac",
-                        "25" = "Plasma Cells 8",
-                        "26" = "Plasma Cells 9",
-                        "27" = "CD8 T Cells",
-                        "28" = "IgG1 B Cells",
-                        "29" = "Th17 ILC",
-                        "30" = "Acinar"
-)
-
-int.T1D_Timepoints = RenameIdents(int.T1D_Timepoints, 
-                        "0" = "Plasma Cells",
-                        "1" = "Th17 ILC",
-                        "2" = "DCs",
-                        "3" = "B Cells",
-                        "4" = "CD4 T Cells",
-                        "5" = "Plasma Cells",
-                        "6" = "Th17 ILC",
-                        "7" = "Th2 ILC",
-                        "8" = "NK",
-                        "9" = "Mast Cells",
-                        "10" = "IgG1+ Plasma Cells",
-                        "11" = "Inflam. Mac",
-                        "12" = "CD4 T Cells",
-                        "13" = "Stromal Cells",
-                        "14" = "CD4 T Cells",
-                        "15" = "Stromal Cells",
-                        "16" = "CD103+ DCs",
-                        "17" = "Stromal Cells",
-                        "18" = "CD4 T Cells",
-                        "19" = "Plasma Cells",
-                        "20" = "Plasma Cells",
-                        "21" = "Plasma Cells",
-                        "22" = "Plasma Cells",
-                        "23" = "Neutrophil",
-                        "24" = "MHCII+ Mac",
-                        "25" = "Plasma Cells",
-                        "26" = "Plasma Cells",
-                        "27" = "CD8 T Cells",
-                        "28" = "IgG1+ B Cells",
-                        "29" = "Th17 ILC",
-                        "30" = "Acinar"
-)
-
-int.T1D_Timepoints[[]]
-DimPlot(int.T1D_Timepoints, reduction = "umap", label = TRUE, pt.size = 0.1, label.size = 4, repel = T, 
-        group.by = "Cell.types2",
-        cols = getPalette(17)) +
-  theme_prism(base_size = 12, base_fontface = "bold") + 
-  theme(legend.text = element_text(size = 14)) +
-  labs( title = "UMAP of Cell Types") 
-ggsave(file = "UMAP_17clusters.png",
-       units = "in",width = 6, height = 4, dpi = 400)
-
-saveRDS(int.T1D_Timepoints, file = "./updated_17cluster_int.T1D_Timepoints.rds")
-
-CellTypeTable_redo = as.data.frame(proportions(table(Idents(int.T1D_Timepoints),
-                                                int.T1D_Timepoints$sample), 
-                                          margin = 2))
-CellTypeTable_redo$Freq = CellTypeTable_redo$Freq*100
-levels(CellTypeTable_redo$Var1)
-
-getPalette = colorRampPalette(brewer.pal(9, "Set1"))
-#display.brewer.all()
-
-
-CellTypeTable_redo$Var2 = factor(CellTypeTable_redo$Var2, levels = c("PBS PreCh1", "PBS Ch4", "PBS Ch7", "NP Ch4", "NP Ch7"))
-#png(file = "CellProportions_24clusters.png",units = "in",width = 14, height = 13, res = 400)
-ggplot(CellTypeTable_redo, aes(x=Var2,y=Freq,fill=Var1)) + 
-  geom_col(width = 0.5, color = "black") +
-  scale_y_continuous(expand = expansion(mult = c(0, .1)))+
-  theme_prism( base_size = 10)+
-  labs(x = "Condition", y= "Percent of Cells") + 
-  scale_fill_manual(values = getPalette(17), name = "Cell Type") + 
-  theme(legend.text = element_text(size = 12), 
-        axis.text.x = element_text(angle = 50, hjust = 1, vjust = 1)
-        #plot.title = element_text(hjust = 0.5)
-  )
-ggsave(file = "CellProportions_17clusters.png",
-       units = "in",width = 5, height = 5.5, dpi = 400)
-
-
-
-
-CellTypeData_redo = CellTypeTable_redo
-# load stringr library
-library(stringr)
-library(ggpubr)
-
-# Split name column into firstname and last name
-CellTypeData_redo[c('Tx', 'TP')] <- str_split_fixed(CellTypeData_redo$Var2, ' ', 2)
-
-
-CellTypeData_redo$Tx = factor(CellTypeData_redo$Tx, levels = c("PBS", "NP"))
-CellTypeData_redo$TP = factor(CellTypeData_redo$TP, levels = c("PreCh1", "Ch4", "Ch7"))
-
-myplots = lapply(unique(CellTypeData_redo$Var1), FUN = plotCellType, data = CellTypeData_redo)
-
-png(file = "CellProportions_17clusters_individual_grid.png", units = "in",width = 28, height = 9, res = 400)
-ggarrange(plotlist = myplots, ncol=9, nrow=2, 
-          common.legend = T, legend = "top")
-dev.off()
-
-
-
-
-
-plotCellTypePresentation(CellTypeData_redo, "B Cells")
-
-
-myplots = lapply(unique(CellTypeData_redo$Var1), FUN = plotCellTypePresentation, data = CellTypeData_redo)
-
-png(file = "ImmuneCell_prop.png",
-    units = "in",width = 17, height = 8, res = 400)
-ggarrange(plotlist = myplots, ncol=6, nrow=3, 
-          common.legend = T, legend = "right")
-
-ggsave(file = "ImmuneCell_prop_17cluster.png",
-       units = "in",width = 17, height = 15
-       , dpi = 400)
-dev.off()
-
-
-
-ggarrange(plotlist = myplots[c(1,9,4,16)], ncol=4, nrow=1, 
-          common.legend = T, legend = "right")
-
-ggsave(file = "ImmuneCell_prop_bcells.png",
-       units = "in",width = 25, height = 7
-       , dpi = 400)
-
-head(int.T1D_Timepoints@meta.data)
-
-int.T1D_Timepoints$Cell.types2 = Idents(int.T1D_Timepoints)
-unique(int.T1D_Timepoints$Cell.Type2.TP.Tx)
-int.T1D_Timepoints$Cell.Type2.TP.Tx = paste0(int.T1D_Timepoints$Cell.types2, "_",
-                                   int.T1D_Timepoints$TP, "_", int.T1D_Timepoints$Tx)
-
-Idents(int.T1D_Timepoints) = "Cell.Type2.TP.Tx"
-int.T1D_Timepoints=PrepSCTFindMarkers(int.T1D_Timepoints)
-
-BcellsNPvPBSCh7 = FindMarkers(
-  int.T1D_Timepoints,
-  ident.1 = "B Cells_Ch7_NP",
-  ident.2 = "B Cells_Ch7_PBS",
-  assay = "SCT",
-  test.use = "wilcox"
-  
-)
-
-IgG1BcellsNPvPBSCh7 = FindMarkers(
-  int.T1D_Timepoints,
-  ident.1 = "IgG1+ B Cells_Ch7_NP",
-  ident.2 = "IgG1+ B Cells_Ch7_PBS",
-  assay = "SCT",
-  test.use = "wilcox"
-  
-)
-
-PlasmaNPvPBSCh7 = FindMarkers(
-  int.T1D_Timepoints,
-  ident.1 = "Plasma Cells_Ch7_NP",
-  ident.2 = "Plasma Cells_Ch7_PBS",
-  assay = "SCT",
-  test.use = "wilcox"
-  
-)
-
-
-IgG1PlasmaNPvPBSCh7 = FindMarkers(
-  int.T1D_Timepoints,
-  ident.1 = "IgG1+ Plasma Cells_Ch7_NP",
-  ident.2 = "IgG1+ Plasma Cells_Ch7_PBS",
-  assay = "SCT",
-  test.use = "wilcox"
-  
-)
-
-BcellsNPvPBSCh4 = FindMarkers(
-  int.T1D_Timepoints,
-  ident.1 = "B Cells_Ch4_NP",
-  ident.2 = "B Cells_Ch4_PBS",
-  assay = "SCT",
-  test.use = "wilcox"
-  
-)
-
-IgG1BcellsNPvPBSCh4 = FindMarkers(
-  int.T1D_Timepoints,
-  ident.1 = "IgG1+ B Cells_Ch4_NP",
-  ident.2 = "IgG1+ B Cells_Ch4_PBS",
-  assay = "SCT",
-  test.use = "wilcox"
-  
-)
-
-PlasmaNPvPBSCh4 = FindMarkers(
-  int.T1D_Timepoints,
-  ident.1 = "Plasma Cells_Ch4_NP",
-  ident.2 = "Plasma Cells_Ch4_PBS",
-  assay = "SCT",
-  test.use = "wilcox"
-  
-)
-
-
-IgG1PlasmaNPvPBSCh4 = FindMarkers(
-  int.T1D_Timepoints,
-  ident.1 = "IgG1+ Plasma Cells_Ch4_NP",
-  ident.2 = "IgG1+ Plasma Cells_Ch4_PBS",
-  assay = "SCT",
-  test.use = "wilcox"
-  
-)
 
 
 #GSEA of B cells Plasma Cells ----
@@ -2587,9 +1615,9 @@ y_filt3$Subset = "IgG1+ B cells"
 y_filt4 = rbind(y_filt, y_filt1, y_filt2, y_filt3)
 y_filt4 = y_filt4[which(y_filt4$p.adjust < 0.1),]
 
-y_filt4 = y_filt4[which(abs(y_filt4$NES)>1.9 & y_filt4$qvalue < 0.05),]
+y_filt4 = y_filt4[which(abs(y_filt4$NES)>1.10 & y_filt4$qvalue < 0.05),]
 
-ggplot(y_filt4[which(abs(y_filt4$NES)>1.9 & y_filt4$qvalue < 0.05),], aes(x = Subset, y = fct_reorder(Description, abs(NES)))) + 
+ggplot(y_filt4[which(abs(y_filt4$NES)>1.10 & y_filt4$qvalue < 0.05),], aes(x = Subset, y = fct_reorder(Description, abs(NES)))) + 
   geom_point(aes(color = abs(NES), size = qvalue) ) +
   theme_bw(base_size = 14) +
   scale_colour_gradient2( low = "blue",high="red", mid = "white",na.value = "black") +
@@ -2633,7 +1661,7 @@ EnhancedVolcano(data1,
 dev.off()
 
 
-## ----subcluster T cells-------------------------------------------------------------------------------------------------------------------------------
+## ----Subcluster cells-------------------------------------------------------------------------------------------------------------------------------
 Idents(int.T1D_Timepoints) = int.T1D_Timepoints$Cell.types2
 
 names(int.T1D_Timepoints@graphs)
@@ -2730,8 +1758,8 @@ Tcellmarkers = c(
   "Ccr4","Cxcr3", "Cxcr4","Ccr5", "Fasl","Trp73","Il12rb1","Il12rb2","Il18r1" , "Il18rap","Ifng","Ifngr1", "Stat1","Tbx21", #Tbet 
   #Th2:
   "Il4","Il4ra", "Il5","Il5ra", "Gata3",
-  #Th9:
-  "Ccr3", "Ccr6", "Spi1","Il9r",#"Il22ra1",
+  #Th10:
+  "Ccr3", "Ccr6", "Spi1","Il10r",#"Il22ra1",
   #Th17: Ccr6, Ccr4 Nk1.1
   "Il17a",  "Il17f" , "Il17re", "Il17rc", "Il17ra" ,"Il17rd", "Il17rb", "Il17d" ,
   "Klrb1c","Il6ra","Tgfb1","Il23a",
@@ -2786,7 +1814,7 @@ VlnPlot(Tcell_data, features = c("Cd8a","Cd8b1","Cd4" ,"Tcrg-V4", "Tcrg-V6", "Tc
 
 VlnPlot(Tcells, features = c("Lag3", "Izumo1r","Cd274"), split.by = "sample")
 
-VlnPlot(Tcells, features = c("Cd4", "Cd8a","Gzmk","Nkg7", "Ccl5", "Ccr9", "Itga4"), split.by = "sample") +
+VlnPlot(Tcells, features = c("Cd4", "Cd8a","Gzmk","Nkg7", "Ccl5", "Ccr10", "Itga4"), split.by = "sample") +
   theme(legend.position = 'right')
 
 VlnPlot(Tcells, features = c("Cd4","Il12rb1", "Cxcr3", "Tbx21", "Il18r1", "Ctsw", "Cxcr6", "Il2rb", "Pde7a"), split.by = "sample") +
@@ -2912,7 +1940,7 @@ DotPlot(Bcells, features =c(
   "Il7r","Cd5","Rorc","Gata3", "Maff","Il23r", #ILC
   "Cd3e", "Trac",
   "H2-DMb1", "H2-DMb2","H2-Eb1", "H2-Aa", "H2-Ab1", "H2-DMa", #Myeloid
-  "Cd19",  "Ms4a1","Ighd","Ighm", "Cd22", #Bcells
+  "Cd110",  "Ms4a1","Ighd","Ighm", "Cd22", #Bcells
   "Cd74", "Cd44", "Cxcr4", "Bach2", "Sell", "Ltb", "Prdm1", #"Blimp1",
   "Il4","Il4ra", "Il5","Il5ra", "Il1a", "Il1b", "Il6","Ctla4",
   "Havcr1","Tnfrsf10b",
@@ -2928,7 +1956,7 @@ DotPlot(Bcells, features =c(
   "Il7r","Cd5","Rorc","Gata3", "Maff","Il23r", #ILC
   "Mcpt1", "Fcer1a", "Kit", #Mast Cells
   "H2-DMb1", "H2-DMb2","H2-Eb1", "H2-Aa", "H2-Ab1", "H2-DMa", #Myeloid
-  "Cd19",  "Ms4a1","Ighd","Ighm", "Cd22", #Bcells
+  "Cd110",  "Ms4a1","Ighd","Ighm", "Cd22", #Bcells
   "Jchain", "Sdc1", "Tnfrsf13b", "Igha", "Ighe", "Ighg1", "Ighg2b", "Ighg2c", "Ighg3"  #Plasma 
 ), scale = F
 ) + 
@@ -2942,13 +1970,13 @@ DotPlot(Bcells, features =c(
   "Mcpt1", "Fcer1a", "Kit", #Mast Cells
   "Xcl1","Ncr1", "Klre1", "Klri1", "Gzma", "Gzmb",#NK
   "Col4a1","Flt1","Nkx2-3", "Tie1", #Stromal
-  "S100a8", "S100a9", #Neut
-  "Clec9a",  "Itgax", "Cd209a", # DCs /CD11c+ SiglecH DC-sign(Cd209a/d)
+  "S100a8", "S100a10", #Neut
+  "Clec10a",  "Itgax", "Cd2010a", # DCs /CD11c+ SiglecH DC-sign(Cd2010a/d)
   "Itgae",#CD103
   "Itgam", "Adgre1", "Adgre4","Apoe","Cd14","Ms4a7", "Cd68", #Mac
   "Mrc1", "Msr1", "Fcgr3",  "Ccr3", "Cxcl2",  "Cx3cr1", "Il1a", "Il1b","Ccr2", #Mac
   "H2-DMb1", "H2-DMb2","H2-Eb1", "H2-Aa", "H2-Ab1", "H2-DMa", #MHC-II
-  "Cd19",  "Ms4a1","Ighd","Ighm", "Cd22", #Bcells
+  "Cd110",  "Ms4a1","Ighd","Ighm", "Cd22", #Bcells
   "Jchain", "Sdc1", "Tnfrsf13b", "Igha", "Ighe"  #Plasma 
 ), scale = F, assay = "RNA"
 ) + 
@@ -2960,11 +1988,11 @@ colnames(Bcells[[]])
 
 Idents(Bcells)
 
-VlnPlot(Bcells, features = c("Cd19", "Il1a", "Pax5", "Cd80", "Cd86", "Spi1", "Spn", "Sdc1", "Cd1d1", "Itgam", "Ighd"), 
+VlnPlot(Bcells, features = c("Cd110", "Il1a", "Pax5", "Cd80", "Cd86", "Spi1", "Spn", "Sdc1", "Cd1d1", "Itgam", "Ighd"), 
         split.by = "sample", assay = "RNA") +
   theme(legend.position = 'right')
 
-VlnPlot(int.T1D_Timepoints, features = c("Cd19","Ighd", "Ighm", "Ighg1", "Ighg2b", "Cr2", "Fcer2a", "Fcrl1"), 
+VlnPlot(int.T1D_Timepoints, features = c("Cd110","Ighd", "Ighm", "Ighg1", "Ighg2b", "Cr2", "Fcer2a", "Fcrl1"), 
         split.by = "sample", assay = "RNA") +
   theme(legend.position = 'right')
 
