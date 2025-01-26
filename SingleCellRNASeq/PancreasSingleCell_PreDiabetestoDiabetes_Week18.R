@@ -253,7 +253,41 @@ ggsave(file = "UMAP_CellTypeclusters_Week18.png",
 
 
 saveRDS(int.T1D_Week18, file = "./annotated_int.T1D_Week18_v3.rds")
+int.T1D_Week18<-readRDS("./annotated_int.T1D_Week18_v3.rds")
+DimPlot(int.T1D_Week18)
+# Extract the colors from the plot
+ggplotColours <- function(n = 6, h = c(0, 360) + 15){
+  if ((diff(h) %% 360) < 1) h[2] <- h[2] - 360/n
+  hcl(h = (seq(h[1], h[2], length = n)), c = 100, l = 65)
+}
 
+color_list <- ggplotColours(n=7)
+# Create frequency tables for Week 18 using active.ident and group
+freq_w18<- prop.table(x = table(int.T1D_Week18@active.ident,int.T1D_Week18@meta.data[, "group"]), margin =2)
+# Create a vector of colors for each bar
+bar_colors <- rep(color_list, length.out = nrow(freq_w18))
+# Set the resolution to 300 DPI
+# Plot for Week 18 T Cells
+par(mar = c(5, 6, 4, 6))  # Increasing the right margin to 6
+
+# Plot the bar plot with modified x-axis label rotation
+barplot(
+  freq_w18, 
+  xlim = c(0, ncol(freq_w18) + 3),
+  col = bar_colors, 
+  legend.text = TRUE, 
+  args.legend = list(
+    x = ncol(freq_w18) + 4.2, 
+    y = max(colSums(freq_w18)), 
+    bty = "n", 
+    cex = 1.5
+  ), 
+  width = 1.25, 
+  ylab = "Fraction of Cell Population",
+  cex.lab = 2,   # Increase font size of axis titles
+  cex.names = 2,  # Increase font size of x-axis labels
+  cex.axis = 1.5     # Increase font size of axis tick labels
+)
 
 ## ----T Cell subclustering---------------------------------------------------------------------------------------------------------------------------------------
 
@@ -475,8 +509,48 @@ Tcells_w18$Idents<-Idents(Tcells_w18)
 Idents(Tcells_w18)<-Tcells_w18$TCellType
 DimPlot(Tcells_w18,reduction = 'umap',label = T)
 saveRDS(Tcells_w18, file = "./annotated_Tcells_w18_int_T1D_Week18_v1.rds")
+Tcells_w18<-readRDS("./annotated_Tcells_w18_int_T1D_Week18_v1.rds")
+
+Idents(Tcells_w18)<-Tcells_w18$TCellSubType
+DimPlot(Tcells_w18)
 
 
+# Extract the colors from the plot
+ggplotColours <- function(n = 6, h = c(0, 360) + 15){
+  if ((diff(h) %% 360) < 1) h[2] <- h[2] - 360/n
+  hcl(h = (seq(h[1], h[2], length = n)), c = 100, l = 65)
+}
+
+color_list <- ggplotColours(n=8)
+# Create frequency tables for Week 6 and Week 12 using active.ident and group
+freq_Tcells_w18<- prop.table(x = table(Tcells_w18@active.ident,Tcells_w18@meta.data[, "group"]), margin =2)
+# Create a vector of colors for each bar
+bar_colors <- rep(color_list, length.out = nrow(freq_Tcells_w18))
+# Set the resolution to 300 DPI
+# Plot for Week 18 T Cells
+par(mar = c(5, 6, 4, 6))  # Increasing the right margin to 6
+
+# Plot the bar plot with modified x-axis label rotation
+barplot(
+  freq_Tcells_w18, 
+  xlim = c(0, ncol(freq_Tcells_w18) + 3),
+  col = bar_colors, 
+  legend.text = TRUE, 
+  args.legend = list(
+    x = ncol(freq_Tcells_w18) + 4.2, 
+    y = max(colSums(freq_Tcells_w18)), 
+    bty = "n", 
+    cex = 1.5
+  ), 
+  width = 1.25, 
+  ylab = "Fraction of T Cell Population",
+  cex.lab = 2,   # Increase font size of axis titles
+  cex.names = 2,  # Increase font size of x-axis labels
+  cex.axis = 1.5     # Increase font size of axis tick labels
+)
+
+
+dev.off()
 # ----Macrophage subclustering---------------------------------------------------------------------------------------------------------------------------------------
 
 int.T1D_Week18 = FindSubCluster(
@@ -713,4 +787,33 @@ Mac_w18$Idents<-Idents(Mac_w18)
 
 Idents(Mac_w18)<-Mac_w18$MacType
 DimPlot(Mac_w18,reduction = 'umap',label = T)
+
+
+color_list <- ggplotColours(n=4)
+# Create frequency tables for Mac Week 18
+freq_Mac_w18<- prop.table(x = table(Mac_w18@active.ident,Mac_w18@meta.data[, "group"]), margin =2)
+# Create a vector of colors for each bar
+bar_colors <- rep(color_list, length.out = nrow(freq_Mac_w18))
+# Set the resolution to 300 DPI
+# Plot for Week 18 Mac
+par(mar = c(5, 6, 4, 6))  # Increasing the right margin to 6
+
+# Plot the bar plot with modified x-axis label rotation
+barplot(
+  freq_Mac_w18, 
+  xlim = c(0, ncol(freq_Mac_w18) + 3),
+  col = bar_colors, 
+  legend.text = TRUE, 
+  args.legend = list(
+    x = ncol(freq_Mac_w18) + 2, 
+    y = max(colSums(freq_Mac_w18)), 
+    bty = "n", 
+    cex = 1.5
+  ), 
+  width = 1.25, 
+  ylab = "Fraction of Macrophage Population",
+  cex.lab = 2,   # Increase font size of axis titles
+  cex.names = 2,  # Increase font size of x-axis labels
+  cex.axis = 1.5     # Increase font size of axis tick labels
+)
 saveRDS(Mac_w18, file = "./annotated_Mac_w18_int_T1D_Week18_v1.rds")
