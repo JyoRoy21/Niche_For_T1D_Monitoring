@@ -282,10 +282,10 @@ Week12_4@meta.data$group<-"Non-Progressor"
 #Week 6
 Week6_1@meta.data$group<-"Non-Progressor"
 Week6_2@meta.data$group<-"Progressor"
-Week6_3@meta.data$group<-"Progressor"
+Week6_3@meta.data$group<-"Non-Progressor"
 Week6_4@meta.data$group<-"Progressor"
 Week6_5@meta.data$group<-"Progressor"
-Week6_6@meta.data$group<-"Progressor"
+Week6_6@meta.data$group<-"Non-Progressor"
 
 #' 
 #' # Merge THEN scTransform
@@ -631,23 +631,74 @@ DimPlot(T1D_Timepoints, reduction = "umap", label = TRUE, pt.size = 0.5, label.s
 ggsave(file = "UMAP_CellTypeclusters.png",
     units = "in",width = 11, height = 11, dpi = 600)
 
+group_mapping <- c("Week6_1" = "Non-Progressor",
+                   "Week6_2" = "Progressor",
+                   "Week6_3" = "Non-Progressor",
+                   "Week6_4" = "Progressor",
+                   "Week6_5" = "Progressor",
+                   "Week6_6" = "Non-Progressor",
+                   "Week12_1" = "Progressor",
+                   "Week12_2" = "Progressor",
+                   "Week12_3" = "Non-Progressor",
+                   "Week12_4" = "Non-Progressor")
+
+# Ensure sample is being correctly read
+print(unique(T1D_Timepoints$sample))
+# Assign the new group labels while keeping sample as a factor
+# Update the group metadata in Seurat object's meta.data
+T1D_Timepoints@meta.data$group <- group_mapping[as.character(T1D_Timepoints@meta.data$sample)]
+
+T1D_Timepoints@meta.data$group <- factor(T1D_Timepoints@meta.data$group, 
+                                         levels = c("Non-Progressor", "Progressor"))
+
+
+# Verify the changes
+table(T1D_Timepoints$group)
 
 saveRDS(T1D_Timepoints, file = "./annotated_T1D_Timepoints_v3.rds")
 
-T1D_Timepoints = readRDS("./annotated_T1D_Timepoints_v3.rds")
-table(T1D_Timepoints$time,T1D_Timepoints$group)
+T1D_Timepoints = readRDS("./annotated_T1D_Timepoints_v4.rds")
+unique(T1D_Timepoints$sample)
+
+# Plot FeaturePlot for T1D_Timepoints ----
+# Generate FeaturePlots and apply theme individually
+plots <- lapply(c("Cd3e", "Cd3g", "Cd79a", "Cd79b", "C1qa", "C1qb", "S100a11", "H2-Aa", "Jchain"), function(gene) {
+  FeaturePlot(T1D_Timepoints, features = gene) +
+    theme(axis.title = element_blank(),  
+          axis.text = element_blank(),   
+          axis.ticks = element_blank(),  
+          panel.grid = element_blank(),  
+          panel.background = element_blank(),  
+          axis.line = element_blank()) +
+    scale_colour_gradientn(colors = c("#C6DBEF", "#FF4500", "#800026")) # Red-based color scheme
+})
+
+# Combine all plots
+wrap_plots(plots)
 
 
 # Subset the data for Week 6 and Week 12
 week6_data <- subset(T1D_Timepoints,subset =time  %in% c("Week6"))
 week12_data <- subset(T1D_Timepoints,subset =time  %in% c("Week12"))
 
+DimPlot(week6_data,label = TRUE,label.size = 6,repel=TRUE)
+DimPlot(week12_data,label = TRUE,label.size = 6,repel=TRUE)
 # Create frequency tables for Week 6 and Week 12 using active.ident and group
 freq_week6 <- prop.table(x = table(week6_data@active.ident,week6_data@meta.data[, "group"]), margin =2)
 
 freq_week12 <- prop.table(x = table(week12_data@active.ident,week12_data@meta.data[, "group"]), margin =2)
 
-         # Set the resolution to 300 DPI
+ggplotColours <- function(n = 6, h = c(0, 360) + 15){
+  if ((diff(h) %% 360) < 1) h[2] <- h[2] - 360/n
+  hcl(h = (seq(h[1], h[2], length = n)), c = 100, l = 65)
+}
+unique(T1D_Timepoints$CellSubType)
+DimPlot(T1D_Timepoints)
+color_list <- ggplotColours(n=7)
+# Create frequency tables for Week 18 using active.ident and group
+# Create a vector of colors for each bar
+bar_colors <- rep(color_list, length.out = nrow(freq_week6))
+# Set the resolution to 300 DPI
 # Plot for Week 6
 par(mar = c(5, 6, 4, 6))  # Increasing the right margin to 6
 
@@ -695,6 +746,43 @@ barplot(
 
 ggsave(file = "CellProportions_10clusters.png",
     units = "in",width = 11, height = 11, dpi = 400)
+dev.off()
+
+# Plot for Changes Over time
+
+freq_time <- prop.table(x = table(T1D_Timepoints@active.ident,T1D_Timepoints@meta.data[, "time"]), margin =2)
+
+par(mar = c(5, 6, 4, 6))  # Increasing the right margin to 6
+
+# Plot the bar plot with modified x-axis label rotation
+barplot(
+  freq_time, 
+  xlim = c(0, ncol(freq_time) + 3),
+  col = bar_colors, 
+  legend.text = TRUE, 
+  args.legend = list(
+    x = ncol(freq_time) + 3, 
+    y = max(colSums(freq_time)), 
+    bty = "n", 
+    cex = 1.5
+  ), 
+  width = 1.25, 
+  ylab = "Fraction of Cell Population",
+  cex.lab = 2,   # Increase font size of axis titles
+  cex.names = 2,  # Increase font size of x-axis labels
+  cex.axis = 1.5     # Increase font size of axis tick labels
+)
+DimPlot(week6_data) +
+  theme(axis.title = element_blank(),  # Remove axis labels
+        axis.text = element_blank(),   # Remove axis text
+        axis.ticks = element_blank(),  # Remove axis ticks
+        panel.grid = element_blank(),  # Remove grid lines
+        panel.background = element_blank(), # Remove background
+        axis.line = element_blank())   # Remove axis lines
+
+
+ggsave(file = "CellProportions_10clusters.png",
+       units = "in",width = 11, height = 11, dpi = 400)
 dev.off()
 
 
@@ -1139,310 +1227,290 @@ DimPlot(Tcells, reduction = "umap",
         combine = F, label = T)
 saveRDS(Tcells, file = "./annotated_TCells_T1D_Timepoints_v1.rds")
 
-DimPlot(T1D_Timepoints, reduction = "umap", 
-        #split.by = c( "Tx"), 
-        combine = F, label = T)
+Tcells<-readRDS("./annotated_TCells_T1D_Timepoints_v1.rds")
 
-library(ggpubr)
-DimPlot(T1D_Timepoints, reduction = "umap", label = TRUE, pt.size = 0.5, label.size = 7, repel = T) +
-  theme_prism(base_size = 16, base_fontface = "bold") + 
-  theme(legend.text = element_text(size = 18)) +
-  labs( title = "UMAP of Cell Types") 
-ggsave(file = "UMAP_CellTypeclusters.png",
-       units = "in",width = 11, height = 11, dpi = 600)
+group_mapping <- c("Week6_1" = "Non-Progressor",
+                   "Week6_2" = "Progressor",
+                   "Week6_3" = "Non-Progressor",
+                   "Week6_4" = "Progressor",
+                   "Week6_5" = "Progressor",
+                   "Week6_6" = "Non-Progressor",
+                   "Week12_1" = "Progressor",
+                   "Week12_2" = "Progressor",
+                   "Week12_3" = "Non-Progressor",
+                   "Week12_4" = "Non-Progressor")
+
+# Ensure sample is being correctly read
+print(unique(Tcells$sample))
+# Assign the new group labels while keeping sample as a factor
+# Update the group metadata in Seurat object's meta.data
+Tcells@meta.data$group <- group_mapping[as.character(Tcells@meta.data$sample)]
+
+Tcells@meta.data$group <- factor(Tcells@meta.data$group, 
+                                         levels = c("Non-Progressor", "Progressor"))
 
 
+# Verify the changes
+table(Tcells$TCellSubType)
 
+getwd()
 
-
-
-library(msigdbr)
-library(dplyr)
-library(tibble)
-library(clusterProfiler)
+library(RColorBrewer)
 library(ggplot2)
-library(forcats)
-library(EnhancedVolcano)
 
-all_gene_sets = msigdbr(species = "Mus musculus")
-unique(all_gene_sets$gs_subcat)
-unique(all_gene_sets$gs_cat)
+# Generate enough distinct colors
+palette_colors <- colorRampPalette(brewer.pal(9, "Paired"))(11)
 
-kegg_gene_sets_msig = msigdbr(species = "mouse", category = "C2", subcategory = "CP:KEGG")
-
-
-biocarta_gene_sets = msigdbr(species = "mouse", category = "C2", subcategory = "CP:BIOCARTA")
-
-Reactome_gene_sets = msigdbr(species = "mouse", subcategory = "CP:REACTOME")
-Wiki_gene_sets = msigdbr(species = "mouse", subcategory = "CP:WIKIPATHWAYS")
-
-HM_gene_sets = msigdbr(species = "mouse", category = "H")
-
-GO_gene_sets = msigdbr(species = "mouse", subcategory = "GO:BP")
+DimPlot(Tcells, reduction = "umap", 
+        group.by = "TCellSubType", 
+        label = TRUE, repel = TRUE, label.size = 6) +
+  scale_color_manual(values = palette_colors) +
+  theme_minimal() +
+  theme(panel.grid = element_blank(),
+        axis.title = element_blank(),
+        axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        legend.text = element_text(size = 16),  # Increase legend text size
+        legend.title = element_text(size = 16, face = "bold"))  # Increase legend title size
 
 
-B0_ch7_PBSvNP_geneList =  B0_ch7_PBSvNP %>%
-  arrange(desc(avg_log2FC)) %>%
-  dplyr::select(symbol, avg_log2FC)
+# Plot T Cell Compositions ----
 
-B0_ch7_PBSvNP_ranks<- deframe(B0_ch7_PBSvNP_geneList)
-
-B1_ch7_PBSvNP_geneList =  B1_ch7_PBSvNP %>%
-  arrange(desc(avg_log2FC)) %>%
-  dplyr::select(symbol, avg_log2FC)
-
-B1_ch7_PBSvNP_ranks<- deframe(B1_ch7_PBSvNP_geneList)
+# Subset the data for Week 6 and Week 12 T Cells
+Idents(Tcells)<-Tcells$TCellSubType
+week6_data_TCells <- subset(Tcells,subset =time  %in% c("Week6"))
+week12_data_TCells <- subset(Tcells,subset =time  %in% c("Week12"))
 
 
-B2_ch7_PBSvNP_geneList =  B2_ch7_PBSvNP %>%
-  arrange(desc(avg_log2FC)) %>%
-  dplyr::select(symbol, avg_log2FC)
+# Create frequency tables for TCells of Week 6 and Week 12 using active.ident and group
+freq_week6_TCells <- prop.table(x = table(week6_data_TCells@active.ident,week6_data_TCells@meta.data[, "group"]), margin =2)
 
-B2_ch7_PBSvNP_ranks<- deframe(B2_ch7_PBSvNP_geneList)
+freq_week12_TCells <- prop.table(x = table(week12_data_TCells@active.ident,week12_data_TCells@meta.data[, "group"]), margin =2)
 
+unique(Tcells$TCellSubType)
 
-combined_data_set = rbind(kegg_gene_sets_msig, 
-                          biocarta_gene_sets,
-                          Reactome_gene_sets,
-                          Wiki_gene_sets,
-                          HM_gene_sets,
-                          GO_gene_sets)
-
-pathway_gene_set = combined_data_set[,c("gs_name", "gene_symbol")]
+color_list <- colorRampPalette(brewer.pal(9, "Paired"))(11)
 
 
+# Ensure TCellSubType is a factor
+Tcells$TCellSubType <- factor(Tcells$TCellSubType)  
+cell_types<-levels(Tcells$TCellSubType)
 
+named_colors<-setNames(color_list,cell_types)
+#colonames(color_list)<-levels(Tcells$TCellSubType)
+# Create frequency tables for Week 18 using active.ident and group
+# Create a vector of colors for each bar
+bar_colors <- named_colors[rownames(freq_week6_TCells)]
+#rep(color_list, length.out = nrow(freq_week6_TCells))
+# Set the resolution to 300 DPI
+# Plot for Week 6
+par(mar = c(5, 6, 4, 6))  # Increasing the right margin to 6
 
-y = GSEA(B0_ch7_PBSvNP_ranks,
-         pvalueCutoff = 0.5,
-         pAdjustMethod = "fdr",
-         #OrgDb = org.Mm.eg.db, 
-         #TERM2GENE = CTD_gene_sets,
-         #TERM2GENE = kegg_gene_sets_msig[,c("gs_description", "entrez_gene")],
-         #TERM2GENE = biocarta_gene_sets[,c("gs_description", "entrez_gene")],
-         #TERM2GENE = Reactome_gene_sets[,c("gs_description", "entrez_gene")],
-         TERM2GENE = pathway_gene_set,
-         minGSSize = 1
-         
+# Plot the bar plot with modified x-axis label rotation
+barplot(
+  freq_week6_TCells, 
+  xlim = c(0, ncol(freq_week6_TCells) + 3),
+  col = bar_colors, 
+  legend.text = TRUE, 
+  args.legend = list(
+    x = ncol(freq_week6_TCells) + 3.5, 
+    y = max(colSums(freq_week6_TCells)), 
+    bty = "n", 
+    cex = 1.5
+  ), 
+  width = 1.25, 
+  ylab = "Fraction of T Cell",
+  cex.lab = 2,   # Increase font size of axis titles
+  cex.names = 2,  # Increase font size of x-axis labels
+  cex.axis = 1.5     # Increase font size of axis tick labels
 )
 
-y1 = GSEA(B1_ch7_PBSvNP_ranks,
-         pvalueCutoff = 0.5,
-         pAdjustMethod = "fdr",
-         #OrgDb = org.Mm.eg.db, 
-         #TERM2GENE = CTD_gene_sets,
-         #TERM2GENE = kegg_gene_sets_msig[,c("gs_description", "entrez_gene")],
-         #TERM2GENE = biocarta_gene_sets[,c("gs_description", "entrez_gene")],
-         #TERM2GENE = Reactome_gene_sets[,c("gs_description", "entrez_gene")],
-         TERM2GENE = pathway_gene_set,
-         minGSSize = 1
-         
+bar_colors <- named_colors[rownames(freq_week12_TCells)]
+
+# Plot for Week 12
+par(mar = c(5, 6, 4, 6))  # Increasing the right margin to 6
+
+# Plot the bar plot with modified x-axis label rotation
+barplot(
+  freq_week12_TCells, 
+  xlim = c(0, ncol(freq_week12_TCells) + 3),
+  col = bar_colors, 
+  legend.text = TRUE, 
+  args.legend = list(
+    x = ncol(freq_week12_TCells) + 3.5, 
+    y = max(colSums(freq_week12_TCells)), 
+    bty = "n", 
+    cex = 1.5
+  ), 
+  width = 1.25, 
+  ylab = "Fraction of T Cell",
+  cex.lab = 2,   # Increase font size of axis titles
+  cex.names = 2,  # Increase font size of x-axis labels
+  cex.axis = 1.5     # Increase font size of axis tick labels
 )
 
-y2 = GSEA(B2_ch7_PBSvNP_ranks,
-         pvalueCutoff = 0.5,
-         pAdjustMethod = "fdr",
-         #OrgDb = org.Mm.eg.db, 
-         #TERM2GENE = CTD_gene_sets,
-         #TERM2GENE = kegg_gene_sets_msig[,c("gs_description", "entrez_gene")],
-         #TERM2GENE = biocarta_gene_sets[,c("gs_description", "entrez_gene")],
-         #TERM2GENE = Reactome_gene_sets[,c("gs_description", "entrez_gene")],
-         TERM2GENE = pathway_gene_set,
-         minGSSize = 1
-         
-)
 
 
-head(y)
+# Change Clustering in T1D_Timepoints for T Cells----
+DimPlot(Tcells,group.by = "TCellTypes")
+Tcells$TCellSubType
+# Ensure the cell names in Tcells exist in T1D_Timepoints
+cells_to_update <- colnames(Tcells)
+T1D_Timepoints$CellSubType<-Idents(T1D_Timepoints)
+DimPlot(T1D_Timepoints,group.by = "CellSubType")
+# Ensure Tcells$TCellSubType is a factor
+Tcells$TCellSubType <- as.character(Tcells$TCellSubType)
 
-y_filt = y[which(abs(y$qvalue)<0.25),]
-#y_filt = as.data.frame(y)
+# Expand levels in T1D_Timepoints$CellSubType to include new ones
+T1D_Timepoints$CellSubType <- factor(T1D_Timepoints$CellSubType, 
+                                     levels = unique(c(levels(T1D_Timepoints$CellSubType), unique(Tcells$TCellSubType))))
 
-y_filt$Condition = "PBS"
-y_filt[which((y_filt$NES)<0),]$Condition = "NP" 
 
-y_filt$Day = "Challenge 7"
-y_filt$Subset = "Cluster 0 Bcells"
+# Assign values without generating invalid factor levels
+T1D_Timepoints$CellSubType[cells_to_update] <- Tcells$TCellSubType
 
-y_filt1 = y1[which(abs(y1$qvalue)<0.25),]
-#y_filt = as.data.frame(y)
+levels(T1D_Timepoints$CellSubType)
+DimPlot(T1D_Timepoints,group.by = "CellSubType")
 
-y_filt1$Condition = "PBS"
-y_filt1[which((y_filt1$NES)<0),]$Condition = "NP" 
 
-y_filt1$Day = "Challenge 7"
-y_filt1$Subset = "Cluster 1 Bcells"
-
-y_filt2 = y2[which(abs(y2$qvalue)<0.25),]
-#y_filt = as.data.frame(y)
-
-y_filt2$Condition = "PBS"
-y_filt2[which((y_filt2$NES)<0),]$Condition = "NP" 
-
-y_filt2$Day = "Challenge 7"
-y_filt2$Subset = "Cluster 2 Bcells"
-
-y_filt3 = rbind(y_filt, y_filt1, y_filt2)
-
-y_filt3 = y_filt3[which(abs(y_filt3$NES)>1.10),]
-
-ggplot(y_filt3, aes(x = Subset, y = fct_reorder(Description, abs(NES)))) + 
-  geom_point(aes(color = abs(NES), size = qvalue) ) +
-  theme_bw(base_size = 14) +
-  scale_colour_gradient2( low = "blue",high="red", mid = "white",na.value = "black") +
-  ylab(NULL) +
-  ggtitle("Biocarta Pathways GSEA at Challenge 7 in T1D_Timepoints") +
-  facet_grid(~Condition) +
-  guides(size = guide_legend(override.aes=list(shape=1))) +
-  theme(panel.grid.major.y = element_line(linetype='dotted', color='#808080'),
-        panel.grid.major.x = element_blank(),
-        legend.text = element_text(size = 16),
-        plot.title = element_text(size = 16, face = "bold"),
-        axis.text.y = element_text(size = 10, face = "bold"),
-        axis.text.x =element_text(size = 16, face = "bold"),
-        axis.title.x = element_blank(),
-        strip.text.x  = element_text(size = 16, face = "bold")) 
-ggsave(file = "BcellsubsetGSEA.png",
-    units = "in",width = 25, height = 20, dpi = 400)
-
-data = B0_ch7_PBSvNP
-keyvals <- ifelse(
-  (data$avg_log2FC < -1.5 & data$p_val_adj <0.05), 'royalblue',
-  ifelse((data$avg_log2FC > 1.5 & data$p_val_adj < 0.05), 'red',
-         'black'))
-keyvals[is.na(keyvals)] <- 'black'
-names(keyvals)[keyvals == 'black'] <- 'Not DEG'
-names(keyvals)[keyvals == 'red'] <- 'PBS'
-names(keyvals)[keyvals == 'royalblue'] <- 'NP'
-
-#png(file = "AllergyScaf_NPPBSCh4_VolcanoPlot.png",units = "in",width = 10, height = 10, res = 400)
-EnhancedVolcano(data,
-                lab = rownames(data),
-                x = 'avg_log2FC',
-                y = 'p_val_adj',
-                pCutoff = 0.05,
-                FCcutoff = 1.5,
-                colCustom = keyvals,
-                selectLab = rownames(data)[which(names(keyvals) %in% c('NP', 'PBS'))],
-                title = "DEGs b/w NP and PBS at Challenge 7",
-                drawConnectors = F,
-                widthConnectors = 0.75,
-                boxedLabels = F)
-dev.off()
+saveRDS(T1D_Timepoints, file = "./annotated_T1D_Timepoints_v4.rds")
 
 
 
-# pseudobulk ----
-# T1D_Timepoints$Cell.types <-Idents(T1D_Timepoints)
-# 
-# 
-# # pseudobulk cells by stimulation condition AND cell type AND donor
-# bulk <- AggregateExpression(T1D_Timepoints, group.by = c("time", "Cell.types", "group"),
-#                             assays = "RNA",
-#                             features = NULL,
-#                             return.seurat = FALSE,
-#                             #group.by = "Cell.types",
-#                             add.ident = NULL,
-#                             slot = "counts",
-#                             verbose = TRUE)
-# 
-# pseudobulk_PBS1 = AggregateExpression(
-#   subset(T1D_Timepoints, idents = c("PBS PreCh1")),
-#   assays = "RNA",
-#   features = NULL,
-#   return.seurat = FALSE,
-#   group.by = "Cell.types",
-#   add.ident = NULL,
-#   slot = "counts",
-#   verbose = TRUE
-# )
-# 
-# Idents(TNBC) = "Day"
-# pseudobulkD10 = AggregateExpression(
-#   subset(TNBC,idents = c("D10")),
-#   assays = "RNA",
-#   features = NULL,
-#   return.seurat = FALSE,
-#   group.by = "new.cluster.ids",
-#   add.ident = NULL,
-#   slot = "counts",
-#   verbose = TRUE
-# )
-# Idents(TNBC) = "new.cluster.ids"
-# head(pseudobulkD10)
-# 
-# Idents(TNBC) = "Day"
-# pseudobulkD7 = AggregateExpression(
-#   subset(TNBC,idents = c("D7")),
-#   assays = "RNA",
-#   features = NULL,
-#   return.seurat = FALSE,
-#   group.by = "new.cluster.ids",
-#   add.ident = NULL,
-#   slot = "counts",
-#   verbose = TRUE
-# )
-# Idents(TNBC) = "new.cluster.ids"
-# head(pseudobulkD7)
-# 
-# 
-# signature_genes1 = read.csv("/Users/lailarad/Documents/BI_EAE/aaron_pEAE/Signature_genes1.csv",row.names = NULL)
-# signature_genesTx = read.csv("/Users/lailarad/Documents/BI_EAE/Cohort1_RNA_seq/signature_genes_VLA4tx.csv",row.names = NULL)
-# signature_genes_day10_pEAE_bulk = read.csv("/Users/lailarad/Documents/BI_EAE/aaron_pEAE/aaronpEAE_signature_genes_day10.csv",row.names = NULL)
-# 
-# 
-# 
-# 
-# Features(int.T1D_Timepoints)
-# Features(int.T1D_Timepoints)[grepl("^H2-", Features(int.T1D_Timepoints))]
-# int.T1D_Timepoints[["RNA"]]$counts[grepl("^H2-", Features(int.T1D_Timepoints)),]
-# mat[grepl("^H2-", Features(int.T1D_Timepoints)),]
-# 
-# pseudobulkset = pseudobulk_PBS1
-# mat = pseudobulkset$RNA
-# mat=log(mat + 1, base = 2)
-# 
-# head(mat)
-# 
-# pseudobulkset = bulk
-# mat = pseudobulkset$RNA
-# mat=log(mat + 1, base = 2)
-# mat = mat - rowMeans(mat)
-# 
-# 
-# 
-# max(mat)
-# 
-# 
-# 
-# sigGenes = (intersect(rownames(mat), signature_genes1$x))
-# sigGenes = (intersect(rownames(mat), signature_genes_day10_pEAE_bulk$x))
-# sigGenes = (intersect(rownames(mat), signature_genesTx$genes))
-# 
-# pheatmap::pheatmap(t(mat),
-#                    #annotation_col = anno,
-#                    show_colnames = T,
-#                    fontsize_row = 18,
-#                    fontsize_col = 12,
-#                    cluster_cols = T,
-#                    cluster_rows = T,
-#                    #annotation_colors = ann_colors,
-#                    #filename = paste(path, "signatureCelltypesD710_vla4tx_log2.png",sep=""),
-#                    width = 8,
-#                    height = 5
-#                    
-#                    
-# )
-# dev.off()
-# getwd()
-# plots <- VlnPlot(TNBC, features = sigGenes[(25:31)], 
-#                  split.by = "sample",
-#                  group.by = "new.cluster.ids", pt.size = 0, combine = FALSE)
-# wrap_plots(plots = plots, ncol = 3)
-# 
-# DotPlot(TNBC, features = sigGenes) + 
-#   RotatedAxis()
 
+# Macrophage Clustering ----
+Mac = subset(x = T1D_Timepoints, idents = "Macrophage")
+table(Mac$group,Mac$time)
+saveRDS(Mac, file = "./Macrophage_T1D_Timepoints_v1.rds")
+
+ElbowPlot(Mac, ndims = 50)
+Mac <- RunUMAP(Mac, dims = 1:30)
+Mac <- FindNeighbors(Mac, dims = 1:30, verbose = F)
+Mac <- FindClusters(Mac, res = 0.2)#graph.name = "SCT_nn"
+
+
+DimPlot(Mac, reduction = "umap", combine = F, label = T)
+
+ VlnPlot(Mac, 
+             features = c("Eif2ak1","Eif2ak2","Eif2ak3",
+                          "Eif2ak4","Eif2s1"), 
+             group.by = "time", 
+             split.by = "group", 
+             split.plot = TRUE)  + scale_fill_manual(values = rev(c("#E41A1C", "#1B5E20"))) +  # Flip color order
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = "right") 
+get_conserved <- function(cluster){
+  Seurat::FindConservedMarkers(Tcells,
+                               ident.1 = cluster,
+                               grouping.var = "sample",
+                               only.pos = TRUE) %>%
+    rownames_to_column(var = "gene")  %>%
+    #left_join(y = unique(annotations[, c("gene_name", "description")]),
+    #          by = c("gene" = "gene_name")) %>%
+    cbind(cluster_id = cluster, .)
+}
+unique(Idents(Tcells))
+
+conserved_markers.Tcells <- map_dfr(0:22, get_conserved)
+conserved_markers.Tcells[is.na(conserved_markers.Tcells)] <- 0
+head(conserved_markers.Tcells)
+
+DefaultAssay(Tcells) = "SCT"
+conserved_markers.Tcells$Week6_3_avg_log2FC
+# Extract top 10 markers per cluster
+top20_TCells <- conserved_markers.Tcells %>% 
+  mutate(avg_fc = (`Week6_1_avg_log2FC` + 
+                     `Week6_2_avg_log2FC` + 
+                     `Week6_3_avg_log2FC` +
+                     `Week6_4_avg_log2FC` +
+                     `Week6_5_avg_log2FC` +
+                     `Week6_6_avg_log2FC` +
+                     `Week12_1_avg_log2FC` + 
+                     `Week12_2_avg_log2FC` +
+                     `Week12_3_avg_log2FC` +
+                     `Week12_4_avg_log2FC` ) /10) %>% 
+  group_by(cluster_id) %>% 
+  top_n(n = 20, 
+        wt = avg_fc)
+
+
+Tcells <- PrepSCTFindMarkers(Tcells)
+all.markers <- FindAllMarkers(Tcells , only.pos = TRUE,recorrect_umi = FALSE)
+
+top20_sct=all.markers %>% 
+  group_by(cluster) %>% 
+  top_n(n = 20, 
+        wt = avg_log2FC)
+
+# Save the top 20 markers grouped by cluster as a CSV file
+write.csv(top20_sct, file = "top20_sct_Tcells_T1D_Timepoints.csv", row.names = FALSE)
+
+
+DotPlot(Tcells,assay = "SCT", features = c( "Tnfrsf4","Tbc1d4","Cd4", #CD4
+                                            "Cd8a","Blk",#CD8
+                                            "Ccr7","Il7r","Lef1","Sell",#Memory
+                                            "Gzma","Gzmb","Klrg1","Tbx21","Zeb2",#SLEC
+                                            "Ccl5", "Gzmk", "Klrc1", "Nkg7", "Cd38", "Cxcr3", "Cxcr6", "Fasl", "Ifng",#CD8 Effector
+                                            "Cd40lg","Il6ra",#Tcon effector
+                                            "Nt5e","Izumo1r",#Anergy
+                                            "Slamf6","Tcf7",#Progenitor
+                                            "Cd200","Il21","Tnfsf8", #Th21
+                                            "Rora","Il17f", "Stat3", "Ccr6",#Th17
+                                            "Bcl6","Cxcr5","Tox2",#Tfh
+                                            "Ctla4","Foxp3","Icos","Ikzf2","Il2ra","Tigit",#Tregs
+                                            "Cd610","Egr1","Egr2","Nr4a1",#Activation
+                                            "Ifit1","Ifit3","Isg15","Stat1",#Interferon sensing
+                                            "Mki67","Stmn1",#Proliferation
+                                            "Tox","Pdcd1","Lag3",#Exhaustion
+                                            "Klra8","Klrb1a","Eomes","Ncr1","Klre1", #NK
+                                            "Tcrg-C2",#Gamm_Delta-,"Trac","Cd3e"
+                                            "Hs3st1","Gata3",#ILC2
+                                            "Hebp1","Ncoa7","Cd74","Cited4","H2-Ab1","Rorc",#ILC3
+                                            
+                                            
+)) + 
+  RotatedAxis() + scale_colour_gradient2(low = "blue", mid = "grey", high = "red")
+
+# Check average expression of Nkg7 per cluster
+AverageExpression(Tcells, features = "Cd8a", group.by = "seurat_clusters")
+
+# Define the T cell subtypes for each cluster
+TCellSubtype <- c("CD4 T Cell",  # Tcon central memory
+                  "CD8 T Cell",  # CD8 central memory
+                  "CD4 T Cell",  # Tcon effector~TBD
+                  "CD4 T Cell",  # Tcon progenitor like ~TBD
+                  "CD4 T Cell",  # Tregs
+                  "CD4 T Cell",  # Tcon central memory /memory~TBD
+                  "CD4 T Cell",  # Tcon Recently Activated 
+                  "CD4 T Cell",  # Tcon central memory
+                  "CD4 T Cell",  # Tcon central memory
+                  "CD8 T Cell",  # CD8 central memory
+                  "CD8 T Cell",  # CD8 central memory
+                  "NK Cell",     # NK Cell
+                  "CD4 T Cell",  # Tcon central memory/effector/progenitor~TBD
+                  "CD4 T Cell",  # Tcon central memory
+                  "CD8 T Cell",  # CD8 central memory
+                  "CD8 T Cell",  # CD8 central memory
+                  "Gamma Delta T Cell",  # Gamma Delta T Cell
+                  "ILC2",        # ILC2
+                  "CD8 T Cell",  # CD8 central memory
+                  "CD4 T Cell",  # Tcon Interferon Sensing
+                  "CD8 T Cell",  # CD8 central memory
+                  "CD8 T Cell",  # CD8 effector like SLEC
+                  "ILC3")        # ILC3
+
+# Ensure the Idents are in numeric format
+ident_integers <- as.integer(Idents(Tcells))
+
+# Check if there are any unexpected levels
+unique(ident_integers)
+
+# Add the T cell subtype information to the metadata of the Seurat object
+Tcells$TCellType <- TCellSubtype[as.integer(Idents(Tcells))]
+
+# Check the updated metadata
+head(Tcells@meta.data)
+DimPlot(Tcells,reduction = 'umap',group.by = "TCellType" ,label = T)
 
 
 
