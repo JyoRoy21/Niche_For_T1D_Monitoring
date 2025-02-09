@@ -105,67 +105,218 @@ head(combined_counts)
 
 ```
 
-## PCA Analysis
+
+
+
+## Volcano Analysis- Early
 ```{r PCA}
-meta_combined_time<-meta_combined
-meta_combined_time$Group <- paste0(meta_combined_time$Group, "_", meta_combined$Time)
-
-
-
-case1_f1 <- flexiDEG.function1(combined_counts, meta_combined_time, # Run Function 1
-                         convert_genes = F, exclude_riken = T, exclude_pseudo = F,
-                         batches = T, quality = T, variance = T,use_pseudobulk = F) # Select filters: 2, 0, 20
-
-
-
 #### Start Analysis ####
 
-case1_f2 <- flexiDEG.function2(case1_f1, meta_combined_time) # Run Function 2
-
-# Reset "Non-Progressor" group
-meta_combined_time$Group <- ifelse(grepl("Non-Progressor", meta_combined_time$Group),
-                                   "Non-Progressor",
-                                   meta_combined_time$Group)
-
-case1_f4 <- flexiDEG.function4(case1_f1, meta_combined_time,validation_option = 1) 
- EN1 <- na.omit(case1_f1[unique(rownames(case1_f1)[as_vector(case1_f4[[1]])]), ])
-EN.95 <- na.omit(case1_f1[unique(rownames(case1_f1)[as_vector(case1_f4[[2]])]), ]) 
-EN.9 <- na.omit(case1_f1[unique(rownames(case1_f1)[as_vector(case1_f4[[3]])]), ]) 
-EN.85 <- na.omit(case1_f1[unique(rownames(case1_f1)[as_vector(case1_f4[[4]])]), ])
-EN.8 <- na.omit(case1_f1[unique(rownames(case1_f1)[as_vector(case1_f4[[5]])]), ]) 
-EN.75 <- na.omit(case1_f1[unique(rownames(case1_f1)[as_vector(case1_f4[[6]])]), ]) 
-EN.7 <- na.omit(case1_f1[unique(rownames(case1_f1)[as_vector(case1_f4[[7]])]), ]) 
-EN.65 <- na.omit(case1_f1[unique(rownames(case1_f1)[as_vector(case1_f4[[8]])]), ]) 
-EN.6 <- na.omit(case1_f1[unique(rownames(case1_f1)[as_vector(case1_f4[[9]])]), ])
-EN.55 <- na.omit(case1_f1[unique(rownames(case1_f1)[as_vector(case1_f4[[10]])]), ]) 
-EN.5 <- na.omit(case1_f1[unique(rownames(case1_f1)[as_vector(case1_f4[[11]])]), ]) 
-EN.45 <- na.omit(case1_f1[unique(rownames(case1_f1)[as_vector(case1_f4[[12]])]), ]) 
-EN.4 <- na.omit(case1_f1[unique(rownames(case1_f1)[as_vector(case1_f4[[13]])]), ]) 
-EN.35 <- na.omit(case1_f1[unique(rownames(case1_f1)[as_vector(case1_f4[[14]])]), ]) 
-EN.3 <- na.omit(case1_f1[unique(rownames(case1_f1)[as_vector(case1_f4[[15]])]), ]) 
-EN.25 <- na.omit(case1_f1[unique(rownames(case1_f1)[as_vector(case1_f4[[16]])]), ]) 
-EN.2 <- na.omit(case1_f1[unique(rownames(case1_f1)[as_vector(case1_f4[[17]])]), ]) 
-EN.15 <- na.omit(case1_f1[unique(rownames(case1_f1)[as_vector(case1_f4[[18]])]), ]) 
-EN.1 <- na.omit(case1_f1[unique(rownames(case1_f1)[as_vector(case1_f4[[19]])]), ]) 
-EN.05 <- na.omit(case1_f1[unique(rownames(case1_f1)[as_vector(case1_f4[[20]])]), ]) 
-EN.0 <- na.omit(case1_f1[unique(rownames(case1_f1)[as_vector(case1_f4[[21]])]), ]) 
-
-# Color palettes
-coul <- colorRampPalette(brewer.pal(11, "RdBu"))(100) # Palette for gene heatmaps
-coul_gsva <- colorRampPalette(brewer.pal(11, "PRGn"))(100) # Palette for gsva heatmaps
-colSide <- flexiDEG.colors(meta_combined_time)
-unique_colSide <- unique(colSide)
-
- EN <- na.omit(case1_f2)
-#dev.off()
-heatmap.2(as.matrix(EN), scale="row", col=coul_gsva, key= T, xlab="", ylab="", 
-          margins=c(7,7), ColSideColors=colSide, trace="none", key.title=NA, 
-          key.ylab=NA, keysize=0.8, dendrogram="both")
-ggbiplot(prcomp(t(EN), scale.=T), ellipse=T, groups=names(colSide), var.axes=F, 
-         var.scale=1, circle=T) + 
-  theme_classic() + scale_color_manual(name="Group", values=colSide)
+# Load necessary libraries
+library(DESeq2)
+library(ggplot2)
+library(dplyr)
 
 
+
+# Assuming case1_f1 is your bulk expression data and meta_combined is the metadata
+
+# Step 1: Run DESeq2 for Early and Intermediate groups
+# Subset data for Early and Intermediate
+
+early_data <- combined_counts[, meta_combined$Time == "Early"]
+early_data <- na.omit(early_data)
+meta_early <- meta_combined[meta_combined$Time == "Early", ]
+
+early_data <- flexiDEG.function1(early_data, meta_early, # Run Function 1
+                         convert_genes = F, exclude_riken = T, exclude_pseudo = F,
+                         batches = F, quality = T, variance = F,use_pseudobulk = F) # Select filters: 0, 0,  0
+# Remove rows where row names start with "Gm" followed by a digit
+early_data <- early_data[!grepl("^Gm[0-9]", rownames(early_data)), ]
+
+
+# DESeq2 analysis for Early Time
+dds_early <- DESeqDataSetFromMatrix(countData = early_data, colData = meta_early, design = ~ Batch+Group)
+dds_early <- DESeq(dds_early)
+results_early <- as.data.frame(results(dds_early, contrast = c("Group", "Progressor", "Non-Progressor")))
+
+# Replace NA p values with 1
+results_early$pvalue[is.na(results_early$pvalue)] <- 1
+results_early$padj[is.na(results_early$padj)] <- 1
+BiocManager::install('EnhancedVolcano')
+library(EnhancedVolcano)
+library(EnhancedVolcano)
+
+# Replace NA p-values with 1
+results_early$pvalue[is.na(results_early$pvalue)] <- 1
+
+
+# Define color mapping using EnhancedVolcano's default shades
+keyvals <- ifelse(results_early$log2FoldChange > 1 & results_early$pvalue < 0.05, "#B31B21",  # Default red
+           ifelse(results_early$log2FoldChange < -1 & results_early$pvalue < 0.05, "#1465AC",  # Default blue
+           "gray"))
+
+names(keyvals) <- ifelse(results_early$log2FoldChange > 1 & results_early$pvalue < 0.05, "Upregulated",
+                  ifelse(results_early$log2FoldChange < -1 & results_early$pvalue < 0.05, "Downregulated", "NS"))
+
+# Generate the volcano plot without "EnhancedVolcano" watermark
+EnhancedVolcano(results_early,
+    lab = rownames(results_early),
+    x = 'log2FoldChange',
+    y = 'pvalue',  
+    title = 'Early Timepoint',
+    pCutoff = 0.05,  
+    FCcutoff = 1,  
+    pointSize = 2.0,
+    labSize = 3.0,
+    colAlpha = 0.75,
+    legendLabels = c("NS", "Log2FC", "P-value", "Both"),
+    legendPosition = 'right',
+    drawConnectors = TRUE,
+    widthConnectors = 0.5,
+    ylab = '-log10(p-value)', 
+    ylim = c(0, max(-log10(results_early$pvalue), na.rm = TRUE) + 1),  
+    colCustom = keyvals,  # Apply custom colors
+    caption = NULL  # Removes the watermark text
+)
+
+
+# Save the plot as PNG
+ggsave("Volcanoplot_Early.png", width = 8, height = 6, dpi = 600)
+# Save the merged_results data frame to a CSV file
+write.csv(results_early, file = "DEGAnalysis_Volcano_Early.csv", row.names = TRUE)
+```
+
+
+
+## Volcano Analysis- Intermediate
+```{r Volcano Analysis- Intermediate}
+#### Start Analysis ####
+
+# Step 1: Run DESeq2 for Intermediate and Intermediate groups
+# Subset data for Intermediate and Intermediate
+
+Intermediate_data <- combined_counts[, meta_combined$Time == "Intermediate"]
+Intermediate_data <- na.omit(Intermediate_data)
+meta_Intermediate <- meta_combined[meta_combined$Time == "Intermediate", ]
+
+Intermediate_data <- flexiDEG.function1(Intermediate_data, meta_Intermediate, # Run Function 1
+                         convert_genes = F, exclude_riken = T, exclude_pseudo = F,
+                         batches = F, quality = T, variance = F,use_pseudobulk = F) # Select filters: 0, 0,  0
+# Remove rows where row names start with "Gm" followed by a digit
+Intermediate_data <- Intermediate_data[!grepl("^Gm[0-9]", rownames(Intermediate_data)), ]
+
+
+# DESeq2 analysis for Intermediate Time
+dds_Intermediate <- DESeqDataSetFromMatrix(countData = Intermediate_data, colData = meta_Intermediate, design = ~ Batch+Group)
+dds_Intermediate <- DESeq(dds_Intermediate)
+results_Intermediate <- as.data.frame(results(dds_Intermediate, contrast = c("Group", "Progressor", "Non-Progressor")))
+
+# Replace NA p-values with 1
+results_Intermediate$pvalue[is.na(results_Intermediate$pvalue)] <- 1
+results_Intermediate$padj[is.na(results_Intermediate$padj)] <- 1
+
+# Define color mapping using EnhancedVolcano's default shades
+keyvals <- ifelse(results_Intermediate$log2FoldChange > 1 & results_Intermediate$pvalue < 0.05, "#B31B21",  # Default red
+           ifelse(results_Intermediate$log2FoldChange < -1 & results_Intermediate$pvalue < 0.05, "#1465AC",  # Default blue
+           "gray"))
+
+names(keyvals) <- ifelse(results_Intermediate$log2FoldChange > 1 & results_Intermediate$pvalue < 0.05, "Upregulated",
+                  ifelse(results_Intermediate$log2FoldChange < -1 & results_Intermediate$pvalue < 0.05, "Downregulated", "NS"))
+
+# Generate the volcano plot without "EnhancedVolcano" watermark
+EnhancedVolcano(results_Intermediate,
+    lab = rownames(results_Intermediate),
+    x = 'log2FoldChange',
+    y = 'pvalue',  
+    title = 'Intermediate Timepoint',
+    pCutoff = 0.05,  
+    FCcutoff = 1,  
+    pointSize = 2.0,
+    labSize = 3.0,
+    colAlpha = 0.75,
+    legendLabels = c("NS", "Log2FC", "P-value", "Both"),
+    legendPosition = 'right',
+    drawConnectors = TRUE,
+    widthConnectors = 0.5,
+    ylab = '-log10(p-value)',  
+    xlim= c(-10,10),
+    ylim = c(0, max(-log10(results_Intermediate$pvalue), na.rm = TRUE) + 1),  
+    colCustom = keyvals,  # Apply custom colors
+    caption = NULL  # Removes the watermark text
+)
+
+
+# Save the plot as PNG
+ggsave("Volcanoplot_Intermediate.png", width = 8, height = 6, dpi = 600)
+# Save the merged_results data frame to a CSV file
+write.csv(results_Intermediate, file = "DEGAnalysis_Volcano_Intermediate.csv", row.names = TRUE)
+```
+
+
+
+## Volcano Analysis- Late
+```{r PCA}
+#### Start Analysis ####
+
+# Step 1: Run DESeq2 for Late and Intermediate groups
+# Subset data for Late and Intermediate
+
+Late_data <- combined_counts[, meta_combined$Time == "Late"]
+Late_data <- na.omit(Late_data)
+meta_Late <- meta_combined[meta_combined$Time == "Late", ]
+
+Late_data <- flexiDEG.function1(Late_data, meta_Late, # Run Function 1
+                         convert_genes = F, exclude_riken = T, exclude_pseudo = F,
+                         batches = F, quality = T, variance = F,use_pseudobulk = F) # Select filters: 0, 0,  0
+# Remove rows where row names start with "Gm" followed by a digit
+Late_data <- Late_data[!grepl("^Gm[0-9]", rownames(Late_data)), ]
+
+
+# DESeq2 analysis for Late Time
+dds_Late <- DESeqDataSetFromMatrix(countData = Late_data, colData = meta_Late, design = ~ Batch+Group)
+dds_Late <- DESeq(dds_Late)
+results_Late <- as.data.frame(results(dds_Late, contrast = c("Group", "Progressor", "Non-Progressor")))
+# Replace NA p values with 1
+results_Late$padj[is.na(results_Late$padj)] <- 1
+results_Late$pvalue[is.na(results_Late$pvalue)] <- 1
+
+
+# Define color mapping using EnhancedVolcano's default shades
+keyvals <- ifelse(results_Late$log2FoldChange > 1 & results_Late$pvalue < 0.05, "#B31B21",  # Default red
+           ifelse(results_Late$log2FoldChange < -1 & results_Late$pvalue < 0.05, "#1465AC",  # Default blue
+           "gray"))
+
+names(keyvals) <- ifelse(results_Late$log2FoldChange > 1 & results_Late$pvalue < 0.05, "Upregulated",
+                  ifelse(results_Late$log2FoldChange < -1 & results_Late$pvalue < 0.05, "Downregulated", "NS"))
+
+# Generate the volcano plot without "EnhancedVolcano" watermark
+EnhancedVolcano(results_Late,
+    lab = rownames(results_Late),
+    x = 'log2FoldChange',
+    y = 'pvalue',  
+    title = 'Late Timepoint',
+    pCutoff = 0.05,  
+    FCcutoff = 1,  
+    pointSize = 2.0,
+    labSize = 3.0,
+    colAlpha = 0.75,
+    legendLabels = c("NS", "Log2FC", "P-value", "Both"),
+    legendPosition = 'right',
+    drawConnectors = TRUE,
+    widthConnectors = 0.5,
+    ylab = '-log10(p-value)',  
+     xlim = c(-10,10),
+    ylim = c(0, max(-log10(results_Late$pvalue), na.rm = TRUE) + 1),  
+    colCustom = keyvals,  # Apply custom colors
+    caption = NULL  # Removes the watermark text
+)
+
+
+# Save the plot as PNG
+ggsave("Volcanoplot_Late.png", width = 8, height = 6, dpi = 600)
+# Save the merged_results data frame to a CSV file
+write.csv(results_Late, file = "DEGAnalysis_Volcano_Late.csv", row.names = TRUE)
 ```
 
 
@@ -1302,7 +1453,7 @@ cat("Filtered file saved as 'Filtered_GSEA_metab_results.csv' in the working dir
 library(ggplot2)
 library(dplyr)
 library(tidyr)
-
+filtered_gsea_metab_df<-as.data.frame(read.csv("/Users/jyotirmoyroy/Desktop/Immunometabolism T1D Paper/Results/Figure 1/Data/Filtered_GSEA_metab_results.csv"))
 # Reshape the data into long format for plotting
 filtered_gsea_metab_long <- filtered_gsea_metab_df %>%
   select(ID, starts_with("early_"), starts_with("intermediate_"), starts_with("late_")) %>%
@@ -1329,9 +1480,9 @@ Immune_pathways <- c(
   "REACTOME_ALTERNATIVE_COMPLEMENT_ACTIVATION",
   "REACTOME_CD22_MEDIATED_BCR_REGULATION",
   "REACTOME_COSTIMULATION_BY_THE_CD28_FAMILY",
-  "REACTOME_DAP12_SIGNALING",
-  "REACTOME_FCGAMMA_RECEPTOR_FCGR_DEPENDENT_PHAGOCYTOSIS",
-  "REACTOME_FCGR3A_MEDIATED_IL10_SYNTHESIS",
+ # "REACTOME_DAP12_SIGNALING",
+ # "REACTOME_FCGAMMA_RECEPTOR_FCGR_DEPENDENT_PHAGOCYTOSIS",
+#  "REACTOME_FCGR3A_MEDIATED_IL10_SYNTHESIS",
   "REACTOME_INTERLEUKIN_1_PROCESSING",
   "REACTOME_INTERLEUKIN_10_SIGNALING",
   "REACTOME_INTERLEUKIN_18_SIGNALING",
@@ -1341,6 +1492,15 @@ Immune_pathways <- c(
 
 filtered_gsea_immune_top <- filtered_gsea_metab_long %>%
   filter(ID %in% Immune_pathways)
+
+filtered_gsea_immune_top  <- filtered_gsea_immune_top  %>%
+  mutate(timepoint = case_when(
+    timepoint == "early" ~ "Early",
+    timepoint == "intermediate" ~ "Intermediate",
+    timepoint == "late" ~ "Late",
+    TRUE ~ timepoint  # Keep other values unchanged
+  ))
+
 
 plot <- ggplot(filtered_gsea_immune_top, aes(x = timepoint, y = reorder(ID, NES))) +
   geom_point(aes(size = bubble_size, color = NES)) +
@@ -1355,12 +1515,12 @@ plot <- ggplot(filtered_gsea_immune_top, aes(x = timepoint, y = reorder(ID, NES)
     color = "NES"
   ) +
   theme(
-    axis.text.x = element_text(angle = 45, hjust = 1, size = 16),
-    axis.text.y = element_text(size = 14),  # Adjust y-axis text size for readability
-    axis.title.x = element_text(size = 18),  # Increase x-axis title size
-    axis.title.y = element_text(size = 18),  # Increase y-axis title size
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 18, face = "bold"),
+    axis.text.y = element_text(size = 18),  # Adjust y-axis text size for readability
+    axis.title.x = element_text(size = 25),  # Increase x-axis title size
+    axis.title.y = element_text(size = 25),  # Increase y-axis title size
     legend.position = "right",
-    plot.title = element_text(size = 22, face = "bold")  # Increase plot title size
+    plot.title = element_text(size = 26, face = "bold")  # Increase plot title size
   )
 # Save the plot as a PNG file
 ggsave("Immune_signaling_pathways_Scaffold.png", plot, width = 12, height = 10, dpi = 600)
@@ -1388,32 +1548,40 @@ filtered_gsea_metab_long <- filtered_gsea_metab_long %>%
   mutate(bubble_size = -log10(pvalue))
 
 metabolic_pathways <- c(
-  "HALLMARK_CHOLESTEROL_HOMEOSTASIS",
+ # "HALLMARK_CHOLESTEROL_HOMEOSTASIS",
   "HALLMARK_FATTY_ACID_METABOLISM",
+  "KEGG_SELENOAMINO_ACID_METABOLISM",
   "KEGG_BIOSYNTHESIS_OF_UNSATURATED_FATTY_ACIDS",
   "KEGG_BUTANOATE_METABOLISM",
   "KEGG_CITRATE_CYCLE_TCA_CYCLE",
   "KEGG_FATTY_ACID_METABOLISM",
   "KEGG_GALACTOSE_METABOLISM",
   "KEGG_GLYCEROLIPID_METABOLISM",
-  "KEGG_INSULIN_SIGNALING_PATHWAY",
+#  "KEGG_INSULIN_SIGNALING_PATHWAY",
   "KEGG_PROPANOATE_METABOLISM",
   "KEGG_PYRUVATE_METABOLISM",
   "KEGG_STARCH_AND_SUCROSE_METABOLISM",
   "KEGG_VALINE_LEUCINE_AND_ISOLEUCINE_DEGRADATION",
-  "REACTOME_BETA_OXIDATION_OF_PRISTANOYL_COA",
-  "REACTOME_BIOTIN_TRANSPORT_AND_METABOLISM",
-  "REACTOME_CARNITINE_METABOLISM",
-  "REACTOME_CHREBP_ACTIVATES_METABOLIC_GENE_EXPRESSION",
-  "REACTOME_FATTY_ACYL_COA_BIOSYNTHESIS",
+#  "REACTOME_BETA_OXIDATION_OF_PRISTANOYL_COA",
+ # "REACTOME_BIOTIN_TRANSPORT_AND_METABOLISM",
+#  "REACTOME_CARNITINE_METABOLISM",
+ # "REACTOME_CHREBP_ACTIVATES_METABOLIC_GENE_EXPRESSION",
+#  "REACTOME_FATTY_ACYL_COA_BIOSYNTHESIS",
   "REACTOME_FRUCTOSE_METABOLISM",
   "REACTOME_GLUCONEOGENESIS",
   "REACTOME_GLUCOSE_METABOLISM",
-  "REACTOME_GLYCOGEN_METABOLISM",
+  "REACTOME_GLYCOGEN_METABOLISM"
 )
 
 filtered_gsea_metab_top30 <- filtered_gsea_metab_long %>%
   filter(ID %in% metabolic_pathways)
+filtered_gsea_metab_top30 <- filtered_gsea_metab_top30 %>%
+  mutate(timepoint = case_when(
+    timepoint == "early" ~ "Early",
+    timepoint == "intermediate" ~ "Intermediate",
+    timepoint == "late" ~ "Late",
+    TRUE ~ timepoint  # Keep other values unchanged
+  ))
 
 plot2<-ggplot(filtered_gsea_metab_top30, aes(x = timepoint, y = reorder(ID, NES))) +
   geom_point(aes(size = bubble_size, color = NES)) +
@@ -1428,12 +1596,12 @@ plot2<-ggplot(filtered_gsea_metab_top30, aes(x = timepoint, y = reorder(ID, NES)
     color = "NES"
   ) +
   theme(
-    axis.text.x = element_text(angle = 45, hjust = 1, size = 16),
-    axis.text.y = element_text(size = 14),  # Adjust y-axis text size for readability
-    axis.title.x = element_text(size = 18),  # Increase x-axis title size
-    axis.title.y = element_text(size = 18),  # Increase y-axis title size
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 18,face="bold"),
+    axis.text.y = element_text(size = 18),  # Adjust y-axis text size for readability
+    axis.title.x = element_text(size = 25),  # Increase x-axis title size
+    axis.title.y = element_text(size = 25),  # Increase y-axis title size
     legend.position = "right",
-    plot.title = element_text(size = 22, face = "bold")  # Increase plot title size
+    plot.title = element_text(size = 26, face = "bold")  # Increase plot title size
   )
 
 # Save the plot as a PNG file
