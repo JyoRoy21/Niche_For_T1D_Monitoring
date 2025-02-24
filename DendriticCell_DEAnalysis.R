@@ -21,8 +21,15 @@ library(clusterProfiler)
 library(ggplot2)
 library(forcats)
 library(EnhancedVolcano)
+suppressPackageStartupMessages(library(escape))
+suppressPackageStartupMessages(library(SingleCellExperiment))
+BiocManager::install("scran")
+suppressPackageStartupMessages(library(scran))
+suppressPackageStartupMessages(library(Seurat))
+suppressPackageStartupMessages(library(SeuratObject))
+
 #' 
-# DESeq and GSEA of Dendritic Cells ----
+## DESeq and GSEA of Dendritic Cells ----
 T1D_Timepoints<-readRDS("./annotated_T1D_Timepoints_v4.rds")
 
 DimPlot(T1D_Timepoints)
@@ -39,11 +46,22 @@ DC_Week6 = PrepSCTFindMarkers(DC_Week6)
 DC_Week12 = PrepSCTFindMarkers(DC_Week12)
 table(DC_Week6$group)
 Idents(DC_Week6)
-DC_Week6_PvNP = FindMarkers(DC_Week6, ident.1 = "Progressor", ident.2 = "Non-Progressor", assay= "SCT",
-                            recorrect_umi = FALSE,p.adjust.method = "none")
-DC_Week12_PvNP = FindMarkers(DC_Week12, ident.1 = "Progressor", ident.2 = "Non-Progressor", assay= "SCT",
+DC_Week6_PvNP = FindMarkers(DC_Week6, 
+                            ident.1 = "Progressor", 
+                            ident.2 = "Non-Progressor", 
+                            assay = "SCT",
+                            recorrect_umi = FALSE)
+# Apply Benjamini-Hochberg correction
+DC_Week6_PvNP$p_val_adj <- p.adjust(DC_Week6_PvNP$p_val, method = "BH")
+
+DC_Week12_PvNP = FindMarkers(DC_Week12,
+                             ident.1 = "Progressor",
+                             ident.2 = "Non-Progressor",
+                             assay= "SCT",
                              recorrect_umi = FALSE)
-rownames(DC_Week12_PvNP)
+DC_Week12_PvNP$p_val_adj <- p.adjust(DC_Week12_PvNP$p_val, method = "BH")
+
+colnames(DC_Week6_PvNP)
 
 DC_Week6_PvNP$symbol = rownames(DC_Week6_PvNP)
 DC_Week12_PvNP$symbol = rownames(DC_Week12_PvNP)
@@ -119,101 +137,121 @@ dev.off()
 
 write.csv(DC_Week12_PvNP_data,"DendriticCells_DEG_Week12.csv",row.names = TRUE)
 
-### GSEA Analysis ----
 
-DC_Week6_PvNP_geneList =  DC_Week6_PvNP %>%
-  arrange(desc(avg_log2FC)) %>%
-  dplyr::select(symbol, avg_log2FC)
+## SCPA Analysis ----
 
-DC_Week12_PvNP_geneList =  DC_Week12_PvNP %>%
-  arrange(desc(avg_log2FC)) %>%
-  dplyr::select(symbol, avg_log2FC)
-
-DC_Week6_PvNP_ranks<- deframe(DC_Week6_PvNP_geneList)
-DC_Week12_PvNP_ranks<- deframe(DC_Week12_PvNP_geneList)
+devtools::install_version("crossmatch", version = "1.3.1", repos = "http://cran.us.r-project.org")
+devtools::install_version("multicross", version = "2.1.0", repos = "http://cran.us.r-project.org")
+BiocManager::install("singscore")
+devtools::install_github("jackbibby1/SCPA")
+library(SCPA)
+library(msigdbr)
+library(magrittr)
+library(dplyr)
+library(Seurat)
+library(cowplot)
+library(plyr)
+library(ggplot2)
+library(openxlsx)
+library(stringr)
+library(tidyverse)
+library(ComplexHeatmap)
+library(SeuratWrappers)
+library(colorRamp2)
+library(ggplot2)
 
 # Define Gene Sets for Enrichment Analysis
 all_gene_sets = msigdbr(species = "Mus musculus")
 unique(all_gene_sets$gs_subcat)
 unique(all_gene_sets$gs_cat)
-kegg_gene_sets_msig = msigdbr(species = "mouse", category = "C2", subcategory = "CP:KEGG")
-biocarta_gene_sets = msigdbr(species = "mouse", category = "C2", subcategory = "CP:BIOCARTA")
-Reactome_gene_sets = msigdbr(species = "mouse", subcategory = "CP:REACTOME")
-Wiki_gene_sets = msigdbr(species = "mouse", subcategory = "CP:WIKIPATHWAYS")
-HM_gene_sets = msigdbr(species = "mouse", category = "H")
-GO_gene_sets = msigdbr(species = "mouse", subcategory = "GO:BP")
-combined_data_set = rbind(kegg_gene_sets_msig, 
-                          HM_gene_sets)
+# kegg_gene_sets_msig = msigdbr(species = "mouse", category = "C2", subcategory = "CP:KEGG")
+# biocarta_gene_sets = msigdbr(species = "mouse", category = "C2", subcategory = "CP:BIOCARTA")
+# Reactome_gene_sets = msigdbr(species = "mouse", subcategory = "CP:REACTOME")
+# Wiki_gene_sets = msigdbr(species = "mouse", subcategory = "CP:WIKIPATHWAYS")
+# HM_gene_sets = msigdbr(species = "mouse", category = "H")
+# GO_gene_sets = msigdbr(species = "mouse", subcategory = "GO:BP")
+# combined_data_set = rbind(kegg_gene_sets_msig, 
+#                           HM_gene_sets)
 
-pathway_gene_set = combined_data_set[,c("gs_name", "gene_symbol")]
+library(msigdbr)
+library(dplyr)
 
-DC_Week6_PvNP_GSEA = GSEA(DC_Week6_PvNP_ranks,
-         pvalueCutoff = 0.5,
-         pAdjustMethod = "fdr",
-         TERM2GENE = pathway_gene_set,
-         minGSSize = 2
-         
-)
+# Load MSigDB H category pathways
+msig_h <- msigdbr("Mus musculus", "H") %>%
+  format_pathways()
 
-y1 = GSEA(DC_Week12_PvNP_ranks,
-          pvalueCutoff = 0.5,
-          pAdjustMethod = "fdr",
-          TERM2GENE = pathway_gene_set,
-          minGSSize = 2
-          
-)
+# Load KEGG pathways from C2 category
+kegg_gene_sets_msig <- msigdbr(species = "mouse", category = "C2", subcategory = "CP:KEGG") %>%
+  format_pathways()
+
+# Load Gene Ontology Biological Process (GO:BP) pathways
+GO_gene_sets <- msigdbr(species = "mouse", subcategory = "GO:BP") %>%
+  format_pathways()
+
+# Combine the pathways into a single data frame
+ # Combine the pathways, ensuring the format remains the same
+pathways <- c(msig_h)
 
 
 
-# Convert GSEA results into a data frame
-DC_Week6_PvNP_results <- as.data.frame(DC_Week6_PvNP_GSEA@result)
+DC_Week6$group
+DC_W6_Progressor <- seurat_extract(DC_Week6,
+                      meta1 = "group", value_meta1 = "Progressor")
+DC_W6_NonProgressor <- seurat_extract(DC_Week6,
+                      meta1 = "group", value_meta1 = "Non-Progressor")
+scpa_out <- compare_pathways(samples = list(DC_W6_Progressor, DC_W6_NonProgressor), 
+                             pathways = pathways)
+head(scpa_out)
+plot_rank(scpa_out = scpa_out, 
+          pathway = "HALLMARK_INTERFERON_GAMMA_RESPONSE", 
+          base_point_size = 2, 
+          highlight_point_size = 3)
 
-# Create dot plot
-ggplot(DC_Week6_PvNP_results, aes(x = NES, y = reorder(Description, NES))) +
-  geom_point(aes(size = -log10(pvalue), color = NES)) +
-  scale_color_gradientn(colors = brewer.pal(9, "YlOrRd")) +
-  scale_size(range = c(2, 10)) +  # Adjust dot sizes
-  theme_minimal() +
-  labs(
-    title = "GSEA Dot Plot - DC Week 6 (PBS vs NP)",
-    x = "Normalized Enrichment Score (NES)",
-    y = "Pathways",
-    size = "-log10(p-value)",
-    color = "NES"
-  ) +
-  theme(
-    axis.text.y = element_text(size = 12),
-    axis.text.x = element_text(size = 12),
-    legend.position = "right"
+scpa_out <- scpa_out %>%
+  filter(FC > 0) %>%  # Remove rows where FC is non-positive
+  mutate(
+    log10_pval = -log10(Pval),         # Calculate -log10(p-value)
+    log2_fc = log2(FC)                 # Calculate log2(FC)
   )
 
-head(y)
+library(ggplot2)
 
-y_filt = y[which(abs(y$qvalue)<0.25),]
-#y_filt = as.data.frame(y)
+library(ggplot2)
 
-y_filt$Condition = "Non-Progressor"
-y_filt[which((y_filt$NES)>0),]$Condition = "Progressor" 
+# Highlight additional pathways
+highlight_pathways <- c("")
 
-y_filt$Day = "Challenge 7"
-y_filt$Subset = "Plasma cells"
+library(ggplot2)
+library(RColorBrewer)
 
-y_filt1 = y1[which(abs(y1$qvalue)<0.25),]
-#y_filt = as.data.frame(y)
-
-y_filt1$Condition = "PBS"
-y_filt1[which((y_filt1$NES)>0),]$Condition = "NP" 
-
-y_filt1$Day = "Challenge 7"
-y_filt1$Subset = "IgG1+ Plasma cells"
-
-y_filt2 = y2[which(abs(y2$qvalue)<0.25),]
-#y_filt = as.data.frame(y)
-
-y_filt2$Condition = "PBS"
-y_filt2[which((y_filt2$NES)>0),]$Condition = "NP" 
-
-y
-
-
+# Create the scatter plot with subtle gridlines
+ggplot(scpa_out, aes(x = log2_fc, y = log10_pval)) +
+  # Plot points, color by log2(FC), with a continuous color scale
+  geom_point(aes(color = log2_fc), size = 5) +  # Increased dot size
+  
+  # Highlight the selected pathways with labels on the left side
+  geom_text(aes(label = ifelse(Pathway %in% highlight_pathways, Pathway, ""),
+                hjust = 1.1, vjust = 0), size = 4, color = "red") +  # Move label to left
+  
+  # Add axis lines
+  theme_minimal() +
+  theme(
+    panel.grid.major = element_line(color = "lightgrey", size = 0.5),  # Light grey gridlines for major ticks
+    panel.grid.minor = element_blank(),  # No minor gridlines
+    axis.line = element_line(color = "black", size = 0.5),  # Black solid axis lines
+    legend.position = "right",  # Show legend for color
+    text = element_text(size = 14),  # Increase text size for readability
+    axis.title = element_text(size = 16),  # Larger axis title font size
+    axis.text = element_text(size = 12)  # Larger axis text font size
+  ) +
+  
+  # Apply color gradient based on log2(FC) using the YlOrRd color palette
+  scale_color_gradientn(colors = brewer.pal(9, "YlOrRd"), 
+                        name = "log2(Fold Change)") +  # Add label for the color legend
+  
+  # Add labels and title
+  labs(
+    x = expression("log"[2] * "(Fold Change)"),
+    y = expression("-log"[10] * "(p-value)")
+  )
 

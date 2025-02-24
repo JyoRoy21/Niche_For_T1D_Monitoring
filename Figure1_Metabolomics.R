@@ -71,8 +71,8 @@ filtered_pathways <- filtered_pathways %>%
 # PLOT
 
 
-
-ggplot(filtered_pathways, aes(x = -log10(FDR), y = Pathway, size = Impact)) +
+filtered_pathways$`-log10(p)`
+ggplot(filtered_pathways, aes(x = `-log10(p)`, y = Pathway, size = Impact)) +
   
   # Early timepoint (Yellow to Red)
   geom_point(data = subset(filtered_pathways, Timepoint == "Early"), aes(color = -log10(`Raw p`)), alpha = 0.8) +
@@ -127,15 +127,38 @@ pathway_metabolite_long <- pathway_metabolite_list %>%
   mutate(Metabolite = trimws(Metabolite))  # Remove extra spaces
 
 
-# Load Metabolite Data for Each Timepoint
-early_metabs <- read.table("/Users/jyotirmoyroy/Desktop/Immunometabolism T1D Paper/Data/Metabolomics/Results/Scaffold/Early Timepoint/Volcano_scaf_early_unfiltered.csv", sep=",", header=T, check.names = FALSE) %>% na.omit() %>% mutate(Timepoint = "Early")
-intermediate_metabs <- read.table("/Users/jyotirmoyroy/Desktop/Immunometabolism T1D Paper/Data/Metabolomics/Results/Scaffold/Intermediate Timepoint/Volcano_scaf_intermediate_unfiltered.csv", sep=",", header=T, check.names = FALSE) %>% na.omit() %>% mutate(Timepoint = "Intermediate")
-late_metabs <- read.table("/Users/jyotirmoyroy/Desktop/Immunometabolism T1D Paper/Data/Metabolomics/Results/Scaffold/Late Timepoint/Volcano_scaf_late_unfiltered.csv", sep=",", header=T, check.names = FALSE) %>% na.omit() %>% mutate(Timepoint = "Late")
-
-# Rename first column to "Metabolite"
-colnames(early_metabs)[1] <- "Metabolite"
+intermediate_metabs <- read.table("/Users/jyotirmoyroy/Desktop/Immunometabolism T1D Paper/Data/Metabolomics/Results/Scaffold/Intermediate Timepoint/Volcano_scaf_intermediate_unfiltered_FDR.csv", 
+                                  sep=",", header=TRUE, check.names=FALSE)
 colnames(intermediate_metabs)[1] <- "Metabolite"
+intermediate_metabs <- intermediate_metabs %>% 
+  na.omit() %>% 
+  mutate(Timepoint = "Intermediate")
+
+
+# Load Metabolite Data for Each Timepoint
+early_metabs <- read.table("/Users/jyotirmoyroy/Desktop/Immunometabolism T1D Paper/Data/Metabolomics/Results/Scaffold/Early Timepoint/Volcano_scaf_early_unfiltered_FDR.csv",
+                           sep=",", header=T, check.names = FALSE) 
+colnames(early_metabs)[1] <- "Metabolite"
+early_metabs <- early_metabs %>% 
+  na.omit() %>% 
+  mutate(Timepoint = "Early")
+
+
+intermediate_metabs <- read.table("/Users/jyotirmoyroy/Desktop/Immunometabolism T1D Paper/Data/Metabolomics/Results/Scaffold/Intermediate Timepoint/Volcano_scaf_intermediate_unfiltered_FDR.csv", 
+                                  sep=",", header=TRUE, check.names=FALSE)
+colnames(intermediate_metabs)[1] <- "Metabolite"
+intermediate_metabs <- intermediate_metabs %>% 
+  na.omit() %>% 
+  mutate(Timepoint = "Intermediate")
+
+
+late_metabs <- read.table("/Users/jyotirmoyroy/Desktop/Immunometabolism T1D Paper/Data/Metabolomics/Results/Scaffold/Late Timepoint/Volcano_scaf_Late_unfiltered_FDR.csv", 
+                          sep=",", header=T, check.names = FALSE)
 colnames(late_metabs)[1] <- "Metabolite"
+late_metabs <- late_metabs %>% 
+  na.omit() %>% 
+  mutate(Timepoint = "Late")
+
 
 # Combine all datasets
 all_metabs <- bind_rows(early_metabs, intermediate_metabs, late_metabs)
@@ -162,7 +185,7 @@ labels <- levels(all_metabs_with_pathways$Pathway)
 
 
 # Plot
-ggplot(all_metabs_with_pathways, aes(x = x_pos, y = `log2(FC)`, size = -log10(raw.pval))) +
+ggplot(all_metabs_with_pathways, aes(x = x_pos, y = `log2(FC)`, size = -log10(p.ajusted))) +
   
   # Early Timepoint (Yellow to Red)
   geom_point(data = subset(all_metabs_with_pathways, Timepoint == "Early"), aes(color = abs(`log2(FC)`)), alpha = 0.8) +
@@ -184,9 +207,8 @@ ggplot(all_metabs_with_pathways, aes(x = x_pos, y = `log2(FC)`, size = -log10(ra
   # Add a denser dotted horizontal line at y = 0 with custom linetype
   geom_hline(yintercept = 0, linetype = "1212", color = "grey50", size = 1.5) +
   
-  # Customize size scale
-  scale_size(range = c(2, 8), name = "-log10(p)") +
-  
+  scale_size(range = c(2, 8), name = bquote(bold("-log10(" * p[adj] * ")")))+
+
   # Custom x-axis labels (Only showing pathway names)
   scale_x_continuous(breaks = breaks, labels = labels) +
   

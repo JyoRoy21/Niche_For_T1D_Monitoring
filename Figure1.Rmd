@@ -143,48 +143,64 @@ results_early <- as.data.frame(results(dds_early, contrast = c("Group", "Progres
 # Replace NA p values with 1
 results_early$pvalue[is.na(results_early$pvalue)] <- 1
 results_early$padj[is.na(results_early$padj)] <- 1
-BiocManager::install('EnhancedVolcano')
+#BiocManager::install('EnhancedVolcano')
 library(EnhancedVolcano)
 library(EnhancedVolcano)
 
-# Replace NA p-values with 1
-results_early$pvalue[is.na(results_early$pvalue)] <- 1
 
+# Define color mapping with stronger contrast for visibility
+keyvals <- ifelse(results_early$padj < 0.1 & results_early$log2FoldChange > 1, "#7E0000",  # Dark red for FDR-significant up
+           ifelse(results_early$padj < 0.1 & results_early$log2FoldChange < -1, "#002E66",  # Dark blue for FDR-significant down
+           ifelse(results_early$log2FoldChange > 1 & results_early$pvalue < 0.05, "#FF0000",  # Bright red for nominally significant up
+           ifelse(results_early$log2FoldChange < -1 & results_early$pvalue < 0.05, "#1E90FF",  # Bright blue for nominally significant down
+           "gray"))))  # Gray for non-significant genes
 
-# Define color mapping using EnhancedVolcano's default shades
-keyvals <- ifelse(results_early$log2FoldChange > 1 & results_early$pvalue < 0.05, "#B31B21",  # Default red
-           ifelse(results_early$log2FoldChange < -1 & results_early$pvalue < 0.05, "#1465AC",  # Default blue
-           "gray"))
+# Assign names for legend
+names(keyvals) <- ifelse(results_early$padj < 0.1 & results_early$log2FoldChange > 1, "FDR < 0.1 & log[2]FC > 1",
+                  ifelse(results_early$padj < 0.1 & results_early$log2FoldChange < -1, "FDR < 0.1 & log[2]FC < -1",
+                         ifelse(results_early$log2FoldChange > 1 & results_early$pvalue < 0.05, "p-value < 0.05 & log[2]FC > 1",
+                                ifelse(results_early$log2FoldChange < -1 & results_early$pvalue < 0.05, "p-value < 0.05 & log[2]FC < -1",
+                                       "Not Significant"))))
 
-names(keyvals) <- ifelse(results_early$log2FoldChange > 1 & results_early$pvalue < 0.05, "Upregulated",
-                  ifelse(results_early$log2FoldChange < -1 & results_early$pvalue < 0.05, "Downregulated", "NS"))
+# Define point size: larger for FDR-significant points
+point_sizes <- ifelse(results_early$padj < 0.1, 3.5, 2.0)
 
-# Generate the volcano plot without "EnhancedVolcano" watermark
+# Genes to label
+genes_to_label_early <- c("S100a8", "S100a9", "Timp4", "Trpv1", "Ctla4", "Ms4a1",
+                           "Ffar2", "Adipoq", "Gys2", "Lipe", "Pck1", "Scd1", "Tshr")
+
+# Generate the volcano plot
+library(EnhancedVolcano)
+
 EnhancedVolcano(results_early,
     lab = rownames(results_early),
+    selectLab = genes_to_label_early,
     x = 'log2FoldChange',
     y = 'pvalue',  
     title = 'Early Timepoint',
     pCutoff = 0.05,  
-    FCcutoff = 1,  
-    pointSize = 2.0,
-    labSize = 3.0,
+    FCcutoff = 1, 
+    pointSize = point_sizes,  # Increase size for FDR-significant points
+    labSize = 4.5,
     colAlpha = 0.75,
-    legendLabels = c("NS", "Log2FC", "P-value", "Both"),
+    legendLabels = c("Not Significant", "p-value < 0.05", "FDR < 0.1", "Both"),
     legendPosition = 'right',
     drawConnectors = TRUE,
     widthConnectors = 0.5,
-    ylab = '-log10(p-value)', 
-    ylim = c(0, max(-log10(results_early$pvalue), na.rm = TRUE) + 1),  
+    xlab = expression("log"[2] ~ "Fold Change (Progressor / Non-Progressor)"),  # Subscript in x-axis
+    ylab = expression("-log"[10] ~ "(p-value)"),  # Subscript in y-axis
+    xlim = c(-8, 8),  # Set x-axis from -8 to 8
+    ylim = c(0, 6),  # Set y-axis limit to 6
     colCustom = keyvals,  # Apply custom colors
-    caption = NULL  # Removes the watermark text
+    caption = NULL  # Removes watermark text
 )
 
+# Save the plot
+ggsave("Volcanoplot_Early.png", width = 10, height = 6, dpi = 600)
 
-# Save the plot as PNG
-ggsave("Volcanoplot_Early.png", width = 8, height = 6, dpi = 600)
-# Save the merged_results data frame to a CSV file
-write.csv(results_early, file = "DEGAnalysis_Volcano_Early.csv", row.names = TRUE)
+# Save the data frame as CSV
+write.csv(results_early, file = "DEGAnalysis_Volcano_Early.csv")
+
 ```
 
 
@@ -217,40 +233,60 @@ results_Intermediate$pvalue[is.na(results_Intermediate$pvalue)] <- 1
 results_Intermediate$padj[is.na(results_Intermediate$padj)] <- 1
 
 # Define color mapping using EnhancedVolcano's default shades
-keyvals <- ifelse(results_Intermediate$log2FoldChange > 1 & results_Intermediate$pvalue < 0.05, "#B31B21",  # Default red
-           ifelse(results_Intermediate$log2FoldChange < -1 & results_Intermediate$pvalue < 0.05, "#1465AC",  # Default blue
-           "gray"))
+# Define color mapping using EnhancedVolcano's default shades
+# Define color mapping with stronger contrast for visibility
+keyvals <- ifelse(results_Intermediate$padj < 0.1 & results_Intermediate$log2FoldChange > 1, "#7E0000",  # Dark red for FDR-significant up
+           ifelse(results_Intermediate$padj < 0.1 & results_Intermediate$log2FoldChange < -1, "#002E66",  # Dark blue for FDR-significant down
+           ifelse(results_Intermediate$log2FoldChange > 1 & results_Intermediate$pvalue < 0.05, "#FF0000",  # Bright red for nominally significant up
+           ifelse(results_Intermediate$log2FoldChange < -1 & results_Intermediate$pvalue < 0.05, "#1E90FF",  # Bright blue for nominally significant down
+           "gray"))))  # Gray for non-significant genes
 
-names(keyvals) <- ifelse(results_Intermediate$log2FoldChange > 1 & results_Intermediate$pvalue < 0.05, "Upregulated",
-                  ifelse(results_Intermediate$log2FoldChange < -1 & results_Intermediate$pvalue < 0.05, "Downregulated", "NS"))
+# Assign names for legend
+# Assign names for legend
+names(keyvals) <- ifelse(results_Intermediate$padj < 0.1 & results_Intermediate$log2FoldChange > 1, "FDR < 0.1 & log[2]FC > 1",
+                  ifelse(results_Intermediate$padj < 0.1 & results_Intermediate$log2FoldChange < -1, "FDR < 0.1 & log[2]FC < -1",
+                         ifelse(results_Intermediate$log2FoldChange > 1 & results_Intermediate$pvalue < 0.05, "p-value < 0.05 & log[2]FC > 1",
+                                ifelse(results_Intermediate$log2FoldChange < -1 & results_Intermediate$pvalue < 0.05, "p-value < 0.05 & log[2]FC < -1",
+                                       "Not Significant"))))
 
-# Generate the volcano plot without "EnhancedVolcano" watermark
+# Define point size: larger for FDR-significant points
+point_sizes <- ifelse(results_Intermediate$padj < 0.1, 3.5, 2.0)
+
+# Genes to label
+genes_to_label_intermediate <- c("Cd300ld5", "Mlf1", "Mmp3", "Cpt1b", "Elovl6", "Ppp1r1a", "Smtnl2", "Tpm2")
+
+# Generate the volcano plot
+library(EnhancedVolcano)
+
 EnhancedVolcano(results_Intermediate,
     lab = rownames(results_Intermediate),
+    selectLab = genes_to_label_intermediate,
     x = 'log2FoldChange',
     y = 'pvalue',  
     title = 'Intermediate Timepoint',
     pCutoff = 0.05,  
-    FCcutoff = 1,  
-    pointSize = 2.0,
-    labSize = 3.0,
+    FCcutoff = 1, 
+    pointSize = point_sizes,  # Increase size for FDR-significant points
+    labSize = 4.5,
     colAlpha = 0.75,
-    legendLabels = c("NS", "Log2FC", "P-value", "Both"),
+    legendLabels = c("Not Significant", "p-value < 0.05", "FDR < 0.1", "Both"),
     legendPosition = 'right',
     drawConnectors = TRUE,
     widthConnectors = 0.5,
-    ylab = '-log10(p-value)',  
-    xlim= c(-10,10),
+    xlab = expression("log"[2] ~ "Fold Change (Progressor / Non-Progressor)"),  # Subscript in x-axis
+    ylab = expression("-log"[10] ~ "(p-value)"),  # Subscript in y-axis
+    xlim = c(-8, 8),  # Updated x-axis limits
     ylim = c(0, max(-log10(results_Intermediate$pvalue), na.rm = TRUE) + 1),  
     colCustom = keyvals,  # Apply custom colors
-    caption = NULL  # Removes the watermark text
+    caption = NULL  # Removes watermark text
 )
 
+# Save the plot
+ggsave("Volcanoplot_Intermediate.png", width = 10, height = 6, dpi = 600)
 
-# Save the plot as PNG
-ggsave("Volcanoplot_Intermediate.png", width = 8, height = 6, dpi = 600)
-# Save the merged_results data frame to a CSV file
-write.csv(results_Intermediate, file = "DEGAnalysis_Volcano_Intermediate.csv", row.names = TRUE)
+# Save the data frame as CSV
+write.csv(results_Intermediate, file = "DEGAnalysis_Volcano_Intermediate.csv")
+
 ```
 
 
@@ -282,41 +318,58 @@ results_Late$padj[is.na(results_Late$padj)] <- 1
 results_Late$pvalue[is.na(results_Late$pvalue)] <- 1
 
 
-# Define color mapping using EnhancedVolcano's default shades
-keyvals <- ifelse(results_Late$log2FoldChange > 1 & results_Late$pvalue < 0.05, "#B31B21",  # Default red
-           ifelse(results_Late$log2FoldChange < -1 & results_Late$pvalue < 0.05, "#1465AC",  # Default blue
-           "gray"))
+# Define color mapping with enhanced contrast
+keyvals <- ifelse(results_Late$padj < 0.1 & results_Late$log2FoldChange > 1, "#7E0000",  # Dark red for FDR-significant up
+           ifelse(results_Late$padj < 0.1 & results_Late$log2FoldChange < -1, "#002E66",  # Dark blue for FDR-significant down
+           ifelse(results_Late$log2FoldChange > 1 & results_Late$pvalue < 0.05, "#FF0000",  # Bright red for nominally significant up
+           ifelse(results_Late$log2FoldChange < -1 & results_Late$pvalue < 0.05, "#1E90FF",  # Bright blue for nominally significant down
+           "gray"))))  # Gray for non-significant genes
 
-names(keyvals) <- ifelse(results_Late$log2FoldChange > 1 & results_Late$pvalue < 0.05, "Upregulated",
-                  ifelse(results_Late$log2FoldChange < -1 & results_Late$pvalue < 0.05, "Downregulated", "NS"))
+# Assign names for legend
+names(keyvals) <- ifelse(results_Late$padj < 0.1 & results_Late$log2FoldChange > 1, "FDR < 0.1 & log[2]FC > 1",
+                  ifelse(results_Late$padj < 0.1 & results_Late$log2FoldChange < -1, "FDR < 0.1 & log[2]FC < -1",
+                         ifelse(results_Late$log2FoldChange > 1 & results_Late$pvalue < 0.05, "p-value < 0.05 & log[2]FC > 1",
+                                ifelse(results_Late$log2FoldChange < -1 & results_Late$pvalue < 0.05, "p-value < 0.05 & log[2]FC < -1",
+                                       "Not Significant"))))
 
-# Generate the volcano plot without "EnhancedVolcano" watermark
+# Define point size: larger for FDR-significant points
+point_sizes <- ifelse(results_Late$padj < 0.1, 3.5, 2.0)
+
+# Genes to label
+genes_to_label_late <- c("Ighg2c", "Il31ra", "Tafa2")
+
+# Generate the volcano plot
+library(EnhancedVolcano)
+
 EnhancedVolcano(results_Late,
     lab = rownames(results_Late),
+    selectLab = genes_to_label_late,
     x = 'log2FoldChange',
     y = 'pvalue',  
     title = 'Late Timepoint',
     pCutoff = 0.05,  
     FCcutoff = 1,  
-    pointSize = 2.0,
-    labSize = 3.0,
+    pointSize = point_sizes,  # Increase size for FDR-significant points
+    labSize = 4.5,
     colAlpha = 0.75,
-    legendLabels = c("NS", "Log2FC", "P-value", "Both"),
+    legendLabels = c("Not Significant", "p-value < 0.05", "FDR < 0.1", "Both"),
     legendPosition = 'right',
     drawConnectors = TRUE,
     widthConnectors = 0.5,
-    ylab = '-log10(p-value)',  
-     xlim = c(-10,10),
-    ylim = c(0, max(-log10(results_Late$pvalue), na.rm = TRUE) + 1),  
+    xlab = expression("log"[2] ~ "Fold Change (Progressor / Non-Progressor)"),  # Subscript in x-axis
+    ylab = expression("-log"[10] ~ "(p-value)"),  # Subscript in y-axis
+    xlim = c(-8, 8),  # X-axis range
+    ylim = c(0, 6),  # Y-axis range
     colCustom = keyvals,  # Apply custom colors
-    caption = NULL  # Removes the watermark text
+    caption = NULL  # Removes watermark text
 )
 
+# Save the plot
+ggsave("Volcanoplot_Late.png", width = 10, height = 6, dpi = 600)
 
-# Save the plot as PNG
-ggsave("Volcanoplot_Late.png", width = 8, height = 6, dpi = 600)
-# Save the merged_results data frame to a CSV file
-write.csv(results_Late, file = "DEGAnalysis_Volcano_Late.csv", row.names = TRUE)
+# Save the data frame as CSV
+write.csv(results_Late, file = "DEGAnalysis_Volcano_Late.csv")
+
 ```
 
 
@@ -1447,7 +1500,7 @@ cat("Filtered file saved as 'Filtered_GSEA_metab_results.csv' in the working dir
 ```
 
 
-### DotPlot-Immune Signalling Pathways
+### DotPlot-Immune and Metabolic Pathways
 ```{r DotPlotImmuneSignalling, echo=FALSE}
 # Load necessary libraries
 library(ggplot2)
@@ -1465,33 +1518,54 @@ filtered_gsea_metab_long <- filtered_gsea_metab_df %>%
 
 # Calculate bubble size as -log10(pvalue)
 filtered_gsea_metab_long <- filtered_gsea_metab_long %>%
-  mutate(bubble_size = -log10(pvalue))
+  mutate(bubble_size = -log10(p.adjust))
 
-Immune_pathways <- c(
+Immune_Metabolic_pathways <- c(
   "KEGG_INSULIN_SIGNALING_PATHWAY",
-  "HALLMARK_INTERFERON_ALPHA_RESPONSE",
+ # "HALLMARK_INTERFERON_ALPHA_RESPONSE",
   "HALLMARK_INTERFERON_GAMMA_RESPONSE",
   "KEGG_PPAR_SIGNALING_PATHWAY",
-  "KEGG_PEROXISOME",
-  "KEGG_ANTIGEN_PROCESSING_AND_PRESENTATION",
+#  "KEGG_PEROXISOME",
+#  "KEGG_ANTIGEN_PROCESSING_AND_PRESENTATION",
   "KEGG_LEUKOCYTE_TRANSENDOTHELIAL_MIGRATION",
   "KEGG_T_CELL_RECEPTOR_SIGNALING_PATHWAY",
   "KEGG_NATURAL_KILLER_CELL_MEDIATED_CYTOTOXICITY",
-  "REACTOME_ALTERNATIVE_COMPLEMENT_ACTIVATION",
-  "REACTOME_CD22_MEDIATED_BCR_REGULATION",
-  "REACTOME_COSTIMULATION_BY_THE_CD28_FAMILY",
+ # "REACTOME_ALTERNATIVE_COMPLEMENT_ACTIVATION",
+#  "REACTOME_CD22_MEDIATED_BCR_REGULATION",
+  "HALLMARK_FATTY_ACID_METABOLISM",
+ # "KEGG_SELENOAMINO_ACID_METABOLISM",
+  #"KEGG_BIOSYNTHESIS_OF_UNSATURATED_FATTY_ACIDS",
+ # "KEGG_BUTANOATE_METABOLISM",
+ # "KEGG_CITRATE_CYCLE_TCA_CYCLE",
+ # "KEGG_FATTY_ACID_METABOLISM",
+ # "KEGG_GALACTOSE_METABOLISM",
+ # "KEGG_GLYCEROLIPID_METABOLISM",
+#  "KEGG_INSULIN_SIGNALING_PATHWAY",
+#  "KEGG_PROPANOATE_METABOLISM",
+  "KEGG_PYRUVATE_METABOLISM",
+  #"KEGG_STARCH_AND_SUCROSE_METABOLISM",
+  #"KEGG_VALINE_LEUCINE_AND_ISOLEUCINE_DEGRADATION",
+#  "REACTOME_BETA_OXIDATION_OF_PRISTANOYL_COA",
+ # "REACTOME_BIOTIN_TRANSPORT_AND_METABOLISM",
+#  "REACTOME_CARNITINE_METABOLISM",
+ # "REACTOME_CHREBP_ACTIVATES_METABOLIC_GENE_EXPRESSION",
+#  "REACTOME_FATTY_ACYL_COA_BIOSYNTHESIS",
+ # "REACTOME_FRUCTOSE_METABOLISM",
+#  "REACTOME_GLUCONEOGENESIS",
+  "REACTOME_GLUCOSE_METABOLISM",
+  "REACTOME_COSTIMULATION_BY_THE_CD28_FAMILY"
  # "REACTOME_DAP12_SIGNALING",
  # "REACTOME_FCGAMMA_RECEPTOR_FCGR_DEPENDENT_PHAGOCYTOSIS",
 #  "REACTOME_FCGR3A_MEDIATED_IL10_SYNTHESIS",
-  "REACTOME_INTERLEUKIN_1_PROCESSING",
-  "REACTOME_INTERLEUKIN_10_SIGNALING",
-  "REACTOME_INTERLEUKIN_18_SIGNALING",
-  "REACTOME_INTERLEUKIN_21_SIGNALING"
+#  "REACTOME_INTERLEUKIN_1_PROCESSING",
+#  "REACTOME_INTERLEUKIN_10_SIGNALING",
+#  "REACTOME_INTERLEUKIN_18_SIGNALING",
+#  "REACTOME_INTERLEUKIN_21_SIGNALING"
 )
 
 
 filtered_gsea_immune_top <- filtered_gsea_metab_long %>%
-  filter(ID %in% Immune_pathways)
+  filter(ID %in% Immune_Metabolic_pathways)
 
 filtered_gsea_immune_top  <- filtered_gsea_immune_top  %>%
   mutate(timepoint = case_when(
@@ -1504,26 +1578,27 @@ filtered_gsea_immune_top  <- filtered_gsea_immune_top  %>%
 
 plot <- ggplot(filtered_gsea_immune_top, aes(x = timepoint, y = reorder(ID, NES))) +
   geom_point(aes(size = bubble_size, color = NES)) +
-  scale_color_gradient2(low = "darkgreen", mid = "#F3E96B", high = "red", midpoint = 0) +  # NES color gradient
-  scale_size(range = c(2, 10)) +  # Bubble size range
+  scale_color_gradient2(low = "blue", mid = "white", high = "red", midpoint = 0) +  # NES color gradient
+  scale_size(range = c(6, 20), name = bquote(bold("-log10(" * p[adj] * ")"))) +  # Bubble size with formatted p-adj
   theme_minimal() +
   labs(
-    title = "Immune Signaling Pathways",
     x = "Time",
     y = "Pathway",
-    size = "-log10(p-value)",
-    color = "NES"
+    color = bquote(bold("NES"))  # Bold NES in legend
   ) +
   theme(
-    axis.text.x = element_text(angle = 45, hjust = 1, size = 18, face = "bold"),
-    axis.text.y = element_text(size = 18),  # Adjust y-axis text size for readability
-    axis.title.x = element_text(size = 25),  # Increase x-axis title size
-    axis.title.y = element_text(size = 25),  # Increase y-axis title size
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 40, face = "bold"),
+    axis.text.y = element_text(size = 40),  # Adjust y-axis text size for readability
+    axis.title.x = element_text(size = 50),  # Increase x-axis title size
+    axis.title.y = element_text(size = 50),  # Increase y-axis title size
+    legend.text = element_text(size = 40),  # Increase legend text size
+    legend.title = element_text(size = 40, face = "bold"),  # Increase legend title size
     legend.position = "right",
-    plot.title = element_text(size = 26, face = "bold")  # Increase plot title size
+    plot.title = element_text(size = 30, face = "bold")  # Increase plot title size
   )
+
 # Save the plot as a PNG file
-ggsave("Immune_signaling_pathways_Scaffold.png", plot, width = 12, height = 10, dpi = 600)
+ggsave("Immune_and Metabolic_pathways_Scaffold.png", plot, width = 24, height = 18, dpi = 600)
 ```
 
 
@@ -1545,32 +1620,32 @@ filtered_gsea_metab_long <- filtered_gsea_metab_df %>%
 
 # Calculate bubble size as -log10(pvalue)
 filtered_gsea_metab_long <- filtered_gsea_metab_long %>%
-  mutate(bubble_size = -log10(pvalue))
+  mutate(bubble_size = -log10(p.adjust))
 
 metabolic_pathways <- c(
  # "HALLMARK_CHOLESTEROL_HOMEOSTASIS",
   "HALLMARK_FATTY_ACID_METABOLISM",
-  "KEGG_SELENOAMINO_ACID_METABOLISM",
-  "KEGG_BIOSYNTHESIS_OF_UNSATURATED_FATTY_ACIDS",
-  "KEGG_BUTANOATE_METABOLISM",
-  "KEGG_CITRATE_CYCLE_TCA_CYCLE",
-  "KEGG_FATTY_ACID_METABOLISM",
-  "KEGG_GALACTOSE_METABOLISM",
-  "KEGG_GLYCEROLIPID_METABOLISM",
+ # "KEGG_SELENOAMINO_ACID_METABOLISM",
+  #"KEGG_BIOSYNTHESIS_OF_UNSATURATED_FATTY_ACIDS",
+ # "KEGG_BUTANOATE_METABOLISM",
+ # "KEGG_CITRATE_CYCLE_TCA_CYCLE",
+ # "KEGG_FATTY_ACID_METABOLISM",
+ # "KEGG_GALACTOSE_METABOLISM",
+ # "KEGG_GLYCEROLIPID_METABOLISM",
 #  "KEGG_INSULIN_SIGNALING_PATHWAY",
-  "KEGG_PROPANOATE_METABOLISM",
+#  "KEGG_PROPANOATE_METABOLISM",
   "KEGG_PYRUVATE_METABOLISM",
-  "KEGG_STARCH_AND_SUCROSE_METABOLISM",
-  "KEGG_VALINE_LEUCINE_AND_ISOLEUCINE_DEGRADATION",
+  #"KEGG_STARCH_AND_SUCROSE_METABOLISM",
+  #"KEGG_VALINE_LEUCINE_AND_ISOLEUCINE_DEGRADATION",
 #  "REACTOME_BETA_OXIDATION_OF_PRISTANOYL_COA",
  # "REACTOME_BIOTIN_TRANSPORT_AND_METABOLISM",
 #  "REACTOME_CARNITINE_METABOLISM",
  # "REACTOME_CHREBP_ACTIVATES_METABOLIC_GENE_EXPRESSION",
 #  "REACTOME_FATTY_ACYL_COA_BIOSYNTHESIS",
-  "REACTOME_FRUCTOSE_METABOLISM",
-  "REACTOME_GLUCONEOGENESIS",
-  "REACTOME_GLUCOSE_METABOLISM",
-  "REACTOME_GLYCOGEN_METABOLISM"
+ # "REACTOME_FRUCTOSE_METABOLISM",
+#  "REACTOME_GLUCONEOGENESIS",
+  "REACTOME_GLUCOSE_METABOLISM"
+#  "REACTOME_GLYCOGEN_METABOLISM"
 )
 
 filtered_gsea_metab_top30 <- filtered_gsea_metab_long %>%

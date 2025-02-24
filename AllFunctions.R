@@ -233,10 +233,10 @@ flexiDEG.function1 <- function(counts, # Counts df, genes=rows & samples=cols,
   
   # Sample quality ---- 
   if (quality == TRUE) { 
-    suppressMessages(ps_LF <- melt(ps_counts, variable.name = "Samples", value.name = "Count")) # Long form
+    suppressMessages(ps_LF <- reshape2::melt(ps_counts, variable.name = "Samples", value.name = "Count")) # Long form
     ps_LF <- merge(ps_LF, metadata, by = "Samples") # Merge w/ metadata to get the group for each sample
     ps_LF <- ps_LF[!is.na(ps_LF$Count), ] # Remove any missing values
-    suppressMessages(psf_LF <- melt(ps_filt, variable.name = "Samples", value.name = "Count")) # Long form
+    suppressMessages(psf_LF <- reshape2::melt(ps_filt, variable.name = "Samples", value.name = "Count")) # Long form
     psf_LF <- merge(psf_LF, metadata, by = "Samples") # Merge w/ metadata to get the group for each sample
     psf_LF <- psf_LF[!is.na(psf_LF$Count), ] # Remove any missing values
     if (sample_num <= 20) { # If 20 samples or less, print to 1 page
