@@ -28,7 +28,9 @@ suppressPackageStartupMessages(library(SeuratObject))
 
 
 ## Subset of T Cells ----
-TCells<-readRDS("./annotated_TCells_T1D_Timepoints_v1.rds")
+
+TCells<-readRDS("/Users/jyotirmoyroy/Desktop/Immunometabolism T1D Paper/Data/Sequencing/SingleCellRNASeq/ProcessedRDSFile/annotated_TCells_T1D_Timepoints_v1.rds")
+
 
 DimPlot(TCells)
 
@@ -96,7 +98,7 @@ EnhancedVolcano(CD4TCells_Week6_PvNP_data,
                 drawConnectors = T,
                 widthConnectors = 0.5,
                 xlim = c(-6, 6),  # Set x-axis from -8 to 8
-                ylim = c(0,6),
+                ylim = c(0,70),
                 boxedLabels = F,
                 legendPosition = 'right',
                 caption = NULL ) # Removes watermark text)
@@ -180,13 +182,66 @@ TconMemory_Week12_PvNP$p_val_adj<-p.adjust(TconMemory_Week12_PvNP$p_val, method 
 TconMemory_Week6_PvNP$symbol = rownames(TconMemory_Week6_PvNP)
 TconMemory_Week12_PvNP$symbol = rownames(TconMemory_Week12_PvNP)
 
+###### Double Volcano----
+library(ggplot2)
+library(dplyr)
+
+# Merge Week 6 and Week 12 data based on the gene symbol
+merged_data <- merge(TconMemory_Week6_PvNP, TconMemory_Week12_PvNP, by = "symbol", suffixes = c("_Week6", "_Week12"))
+
+# Filter for genes meeting the log2FC > 0.5 and p_adj < 0.05 in Week 6 and/or Week 12
+merged_data <- merged_data %>%
+  mutate(
+    status = case_when(
+      avg_log2FC_Week6 > 0.5 & p_val_adj_Week6 < 0.05 & avg_log2FC_Week12 > 0.5 & p_val_adj_Week12 < 0.05 ~ "Upregulated in Both",
+      avg_log2FC_Week6 > 0.5 & p_val_adj_Week6 < 0.05 & !(avg_log2FC_Week12 > 0.5 & p_val_adj_Week12 < 0.05) ~ "Upregulated-Early",
+      avg_log2FC_Week12 > 0.5 & p_val_adj_Week12 < 0.05 & !(avg_log2FC_Week6 > 0.5 & p_val_adj_Week6 < 0.05) ~ "Upregulated-Intermediate",
+      TRUE ~ "Not Significant"
+    )
+  )
+
+# Improved color palette for clarity
+color_palette <- c(
+  "Upregulated in Both" = "#D73027",  # Red
+  "Upregulated-Early" = "#4575B4",    # Blue
+  "Upregulated-Intermediate" = "#013220",  # Light Blue
+  "Not Significant" = "#BEBEBE"      # Gray
+)
+
+# Plotting
+ggplot(merged_data, aes(x = avg_log2FC_Week6, y = avg_log2FC_Week12)) +
+  geom_point(aes(color = status), size = 3, alpha = 0.8) +
+  scale_color_manual(values = color_palette) +
+  geom_text_repel(aes(label = ifelse(status != "Not Significant", symbol, "")), 
+                  size = 4, box.padding = 0.35, max.overlaps = 30) +  # Labeling the points
+  labs(
+    title = "Double Volcano Plot",
+    x = "log2FC for Week 6",
+    y = "log2FC for Week 12",
+    color = "Gene Status"
+  ) +
+  theme_minimal(base_size = 15) +  # Increase font size for readability
+  theme(
+    axis.title = element_text(size = 16),
+    axis.text = element_text(size = 14),
+    legend.title = element_text(size = 16),
+    legend.text = element_text(size = 14),
+    plot.title = element_text(size = 18, face = "bold"),
+    panel.grid.minor = element_blank(),  # Remove minor grid lines
+    panel.border = element_blank(),     # Remove panel border
+    legend.position = "top",
+    plot.margin = margin(10, 10, 10, 10)
+    
+  ) 
+
+
 
 ###### Week 6----
 TconMemory_Week6_PvNP_data = TconMemory_Week6_PvNP
 
 keyvals <- ifelse(
-  (TconMemory_Week6_PvNP_data$avg_log2FC < -1 & TconMemory_Week6_PvNP_data$p_val_adj < 0.05), '#1465AC',  # Non-Progressor (Blue)
-  ifelse((TconMemory_Week6_PvNP_data$avg_log2FC > 1 & TconMemory_Week6_PvNP_data$p_val_adj < 0.05), '#B31B21',  # Progressor (Red)
+  (TconMemory_Week6_PvNP_data$avg_log2FC < -0.5 & TconMemory_Week6_PvNP_data$p_val_adj < 0.05), '#1465AC',  # Non-Progressor (Blue)
+  ifelse((TconMemory_Week6_PvNP_data$avg_log2FC > 0.5 & TconMemory_Week6_PvNP_data$p_val_adj < 0.05), '#B31B21',  # Progressor (Red)
          'grey'))  # Not DEG
 
 keyvals[is.na(keyvals)] <- 'grey'
@@ -202,19 +257,25 @@ EnhancedVolcano(TconMemory_Week6_PvNP_data,
                 y = 'p_val_adj',
                 pCutoff = 0.05,
                 pCutoffCol="p_val_adj",
-                FCcutoff = 1,
+                FCcutoff = 0.5,
                 colCustom = keyvals,
                 labSize = 5.5,
                 colAlpha = 0.75,
-                selectLab = rownames(TconMemory_Week6_PvNP_data)[which(names(keyvals) %in% c('Upregulated- Progressor', 'Uregulated- Non-Progressor'))],
+                selectLab = rownames(TconMemory_Week6_PvNP_data)[which(rownames(TconMemory_Week6_PvNP_data) %in% c(
+                  "Cxcr4", "Hspa1a", "Hspa1b", "Hspa8", 
+                  "Dnajb1", "Dnaja1", "Fos", "Pde4d", 
+                  "Fosb", "Nlrp1a", "Tlr12", "Map3k9", 
+                  "Zfp638", "Gadd45a", "Serpinb9", "Ifi214", 
+                  "Pla2g6", "Nsmf", "Tnfrsf10b","Pde4d", "Pla2g6", "Pfkfb2", "Slc25a37", 
+                  "Slc5a3", "Slc30a6", "Zc3h3", "Fgd6", 
+                  "Mapkbp1", "Fbxw9"
+                ))],
                 title = "TconMemory: Progressor vs Non-Progressor at Week 6",
                 xlab = expression("log"[2] ~ "Fold Change (Progressor / Non-Progressor)"),  # Subscript in x-axis
                 ylab = expression("-log"[10] ~ "(p"[adj] * ")"),  # Subscript in y-axis
-                max.overlaps = 7,
                 drawConnectors = T,
                 widthConnectors = 0.5,
-                xlim = c(-6, 6),  # Set x-axis from -8 to 8
-                ylim = c(0,6),
+                xlim = c(-2, 2),  # Set x-axis from -8 to 8
                 boxedLabels = F,
                 legendPosition = 'right',
                 caption = NULL ) # Removes watermark text)
@@ -996,7 +1057,7 @@ write.csv(CD8Memory_Week12_PvNP_data,"CD8Memory_T1DTimepoints_DEG_Week12.csv",ro
 
 
 
-## SCPA Analysis-Week 6 ----
+## SCPA Analysis ----
 
 devtools::install_version("crossmatch", version = "1.3.1", repos = "http://cran.us.r-project.org")
 devtools::install_version("multicross", version = "2.1.0", repos = "http://cran.us.r-project.org")
@@ -1048,22 +1109,23 @@ GO_gene_sets <- msigdbr(species = "mouse", subcategory = "GO:BP") %>%
 # Combine the pathways, ensuring the format remains the same
 pathways <- c(msig_h,kegg_gene_sets_msig)
 
+### CD8----
+##### Week 6----
 
-Macrophage_W6_Progressor <- seurat_extract(Macrophage_Week6,
+CD8_W6_Progressor <- seurat_extract(CD8TCells_Week6,
                                            meta1 = "group", value_meta1 = "Progressor")
-Macrophage_W6_NonProgressor <- seurat_extract(Macrophage_Week6,
+CD8_W6__NonProgressor <- seurat_extract(CD8TCells_Week6,
                                               meta1 = "group", value_meta1 = "Non-Progressor")
-scpa_out_Mac_W6 <- compare_pathways(samples = list(Macrophage_W6_Progressor, Macrophage_W6_NonProgressor), 
+scpa_out_CD8_W6 <- compare_pathways(samples = list(CD8_W6_Progressor, CD8_W6__NonProgressor), 
                                     pathways = pathways)
-head(scpa_out_Mac_W6)
-
-
+#scpa_out_CD8_W6$adjPval<-p.adjust(scpa_out_CD8_W6$Pval, method = "BH")
+head(scpa_out_CD8_W6)
 
 
 library(ggplot2)
 
 # Filter for significant pathways
-filtered_data <- scpa_out_Mac_W6 %>%
+filtered_data <- scpa_out_CD8_W6 %>%
   filter(Pval < 0.05, adjPval < 0.9,FC>1) %>%
   filter(!Pathway %in% c("KEGG_ALZHEIMERS_DISEASE", "KEGG_ACUTE_MYELOID_LEUKEMIA","HALLMARK_KRAS_SIGNALING_UP","HALLMARK_KRAS_SIGNALING_DN" )) %>% 
   arrange(adjPval)  # Sort by adjusted p-value for better visualization
@@ -1075,7 +1137,7 @@ p <- ggplot(filtered_data, aes(x = -log10(adjPval), y = reorder(Pathway, -log10(
   labs(
     x = expression(bold("-log"[10] ~ "(p"[adj] * "-value)")),
     y = expression(bold("Pathway")),
-    title = "Significant Pathways- Macrophages (Early)"
+    title = "Significant Pathways- CD8 T Cells (Early)"
   ) +
   theme_classic(base_size = 16) +  # Remove gridlines, use classic theme
   theme(
@@ -1090,9 +1152,55 @@ p <- ggplot(filtered_data, aes(x = -log10(adjPval), y = reorder(Pathway, -log10(
 print(p)
 
 # Save the plot in high quality
-ggsave("SCPA_UpRegulated_Barplot_Macrophage_W6.png", plot = p, width = 12, height = 6, dpi = 600)
+ggsave("SCPA_UpRegulated_Barplot_CD8TCells_W6.png", plot = p, width = 12, height = 6, dpi = 600)
 
 
 
-write.csv(scpa_out_Mac_W6,"Macrophage_T1DTimepoints_SCPA_Week6.csv",row.names = TRUE)
+write.csv(scpa_out_CD8_W6,"CD8TCells_T1DTimepoints_SCPA_Week6.csv",row.names = TRUE)
 
+##### Week 12----
+
+CD8_W12_Progressor <- seurat_extract(CD8TCells_Week12,
+                                    meta1 = "group", value_meta1 = "Progressor")
+CD8_W12__NonProgressor <- seurat_extract(CD8TCells_Week12,
+                                        meta1 = "group", value_meta1 = "Non-Progressor")
+mem.maxVSize(128 * 1024 * 1024 * 1024)  # Set to 128 GB (adjust based on your system's available memory)
+scpa_out_CD8_W12 <- compare_pathways(samples = list(CD8_W12_Progressor, CD8_W12__NonProgressor), 
+                                    pathways = pathways)
+#scpa_out_CD8_W12$adjPval<-p.adjust(scpa_out_CD8_W12$Pval, method = "BH")
+head(scpa_out_CD8_W12)
+
+library(ggplot2)
+
+# Filter for significant pathways
+filtered_data <- scpa_out_CD8_W12 %>%
+  filter(Pval < 0.05, adjPval < 0.9) %>%
+  arrange(adjPval)  # Sort by adjusted p-value for better visualization
+scpa_out_CD8_W12$adjPval
+# Create the plot
+# Create the plot with improved aesthetics
+p <- ggplot(filtered_data, aes(x = -log10(adjPval), y = reorder(Pathway, -log10(adjPval)))) +
+  geom_bar(stat = "identity", fill = "#B2182B", color = "black") +  # Red bars with black border
+  labs(
+    x = expression(bold("-log"[10] ~ "(p"[adj] * "-value)")),
+    y = expression(bold("Pathway")),
+    title = "Significant Pathways- CD8 T Cells (Early)"
+  ) +
+  theme_classic(base_size = 16) +  # Remove gridlines, use classic theme
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 18),
+    axis.text.y = element_text(size = 14, face = "bold"),
+    axis.text.x = element_text(size = 14, face = "bold"),
+    axis.title.x = element_text(size = 16, face = "bold"),
+    axis.title.y = element_text(size = 16, face = "bold")
+  )
+
+# Print the plot
+print(p)
+
+# Save the plot in high quality
+ggsave("SCPA_UpRegulated_Barplot_CD8TCells_W12.png", plot = p, width = 12, height = 6, dpi = 600)
+
+
+
+write.csv(scpa_out_CD8_W12,"CD8TCells_T1DTimepoints_SCPA_Week12.csv",row.names = TRUE)
